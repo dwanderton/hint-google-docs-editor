@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+    <style>
+    .branding-below {
+      bottom: 56px;
+      top: 30px;
+    }
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+    .col-contain {
+      overflow: hidden;
+    }
+    .col-one {
+      float: center;
+      width: 50%;
+    }
+    .logo {
+      vertical-align: middle;
+    }
+    .radio-spacer {
+      height: 20px;
+    }
+    .width-100 {
+      width: 100%;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar branding-below" style="text-align: center;">
+
+      <img src="http://jinwu.ca/hint/hint_logo.png" class="center" alt="hint logo" height="100" width="100"><br />
+      <span style="center"><h1>hint</h1></span>
+      <span class="gray">inspiration is just a click away!<br /><br /></span>
+      <span class="secondary">Click on the "hint" button below to get started!<br /></span>
+      <div class="width-100" ><br />
+      <form>
+        <div class="block form-group">
+          <!--label for="insertedText"><b>Text Test</b></label-->
+          <textarea class="width-100" id="insertedText" rows="10"></textarea>
+        </div>
+        <div class="block" id="button-bar">
+          <button class="blue" id="run-hint">Hint</button>
+          <button id="insert-text">Insert</button>
+        </div>
+      </form>
+      <br /><br />
+      </div>
+    </div>
+
+    <div class="sidebar bottom" style="text-align: center; vertical-align: middle; display:inline-block;">
+      <img alt="Add-on logo" class="logo" src="http://jinwu.ca/hint/hint_logo.png" width="15" height="15">
+      <span class="gray branding-text">hintwriting.com</span>
+    </div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+      /**
+       * On document load, two buttons that the user can click on
+       */
+
+      $(function() {
+        console.log('entering button functions');
+        $('#run-hint').click(hintText);
+        $('#insert-text').click(insertText);
+        console.log('exiting button functions');
+      });
+
+      /**
+       * Runs a server-side function to fetch text based on user inputs
+       * the sidebar UI with the resulting text.
+       */
+      function hintText() {
+        console.log('entering hintText');
+        this.disabled = true;
+        $('#error').remove();
+        var originalText = $('input[name=origin]').val();
+        google.script.run
+            .withSuccessHandler(
+              function(TextAndGiveHint, element) {
+                $('#insertedText').val(TextAndGiveHint.suggestion);
+                $('input[name=originalText]').val(TextAndGiveHint.suggestion);
+                element.disabled = false;
+              })
+            .withFailureHandler(
+              function(msg, element) {
+                showError(msg, $('#button-bar'));
+                element.disabled = false;
+              })
+             .withUserObject(this)
+             .getTextandGiveHint();
+        console.log('exiting hintText');
+      }
+
+      /**
+       * Runs a server-side function to insert the fetched text into the document
+       * at the user's cursor or selection.
+       */
+      function insertText() {
+        console.log('entering insertText');
+        //var originalText = $('input[name=origin]').val();
+        this.disabled = true;
+        $('#error').remove();
+        google.script.run
+            .withSuccessHandler(
+              function(returnSuccess, element) {
+                element.disabled = false;
+                //$('#insertedText').val(returnSuccess.suggestion);
+                //$('input[name=originalText]').val(returnSuccess.suggestion);
+              })
+            .withFailureHandler(
+              function(msg, element) {
+                showError(msg, $('#button-bar'));
+                element.disabled = false;
+              })
+            .withUserObject(this)
+            .insertText($('#insertedText').val())
+            .getTextandGiveHint();
+            console.log('exiting insertText');
+      }
+
+      /**
+       * Inserts a div that contains an error message after a given element.
+       *
+       * @param {string} msg The error message to display.
+       * @param {DOMElement} element The element after which to display the error.
+       */
+      function showError(msg, element) {
+        var div = $('<div id="error" class="error">' + msg + '</div>');
+        $(element).after(div);
+      }
+    </script>
+  </body>
+</html>
