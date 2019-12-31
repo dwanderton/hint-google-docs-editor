@@ -65,11 +65,11 @@
     </div>
 
     <div class="sidebar bottom" style="text-align: center; vertical-align: middle; display:inline-block;">
-      <img alt="Add-on logo" class="logo" src="http://jinwu.ca/hint/hint_logo.png" width="15" height="15">
+      <!--<img alt="Add-on logo" class="logo" src="http://jinwu.ca/hint/hint_logo.png" width="15" height="15">-->
       <span class="gray branding-text">hintwriting.com</span>
     </div>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
       /**
        * On document load, two buttons that the user can click on
@@ -87,6 +87,7 @@
        * the sidebar UI with the resulting text.
        */
       function hintText() {
+        gtag('event', 'query', { 'event_category' : 'engagement', method : 'hint-sidebar'});
         console.log('entering hintText');
         this.disabled = true;
         $('#error').remove();
@@ -113,6 +114,7 @@
        * at the user's cursor or selection.
        */
       function insertText() {
+        gtag('event', 'insert', { 'event_category' : 'engagement', method : 'hint-sidebar'});
         console.log('entering insertText');
         //var originalText = $('input[name=origin]').val();
         this.disabled = true;
