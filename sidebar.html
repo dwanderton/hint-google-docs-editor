@@ -94,9 +94,10 @@
         var originalText = $('input[name=origin]').val();
         google.script.run
             .withSuccessHandler(
-              function(TextAndGiveHint, element) {
-                $('#insertedText').val(TextAndGiveHint.suggestion);
-                $('input[name=originalText]').val(TextAndGiveHint.suggestion);
+              function(response, element) {
+                $('#insertedText').val(response.suggestion);
+                $('input[name=originalText]').val(response.suggestion);
+                console.info(response.suggestion)
                 element.disabled = false;
               })
             .withFailureHandler(

@@ -175,17 +175,10 @@ function getTextandGiveHint()
   Logger.log( 'entering getTextandGiveHint' );
   var body = DocumentApp.getActiveDocument().getBody();
   var prompt = body.getText();
-  //var prompt = body.toString();
-  //var prompt = body.editAsText();
-  //var prompt = getSelectedText().join( '\n' );
-  var dummy = "";
+
   Logger.log( 'getTextandGiveHint prompt is' + prompt );
-  /*prompt=prompt.toString();
-  prompt=prompt.replace(/\\n/g,' ');
-  prompt=prompt.replace(/\\"/g,'"');
-  prompt=prompt.replace(/\\u2014 /g,'-- ');
-  var suggestedText=prompt;*/
-  var suggestedText = dummy + retrieveSuggestedTextFromAPI( prompt );
+
+  var suggestedText = retrieveSuggestedTextFromAPI( prompt );
 
   Logger.log( 'getTextandGiveHint text is' + suggestedText );
   Logger.log('exiting getTextandGiveHint');
@@ -362,7 +355,7 @@ function insertText( newText )
 function retrieveSuggestedTextFromAPI(prompt)
 {
   Logger.log('entering retrieveSuggestedTextFromAPI');
-  var url = 'http://ad9b5f19c204411eabbfa0ecd5b2e51a-1708724488.us-west-2.elb.amazonaws.com/text/generator';
+  var url = 'http://aacbd65622cc911eaa87d0286260640b-2049507335.us-west-2.elb.amazonaws.com/hint/api-v0';
 
   var data =
   {
@@ -377,20 +370,24 @@ function retrieveSuggestedTextFromAPI(prompt)
     'payload' : JSON.stringify(data)
   };
 
-  var response = UrlFetchApp.fetch(url, options);
-  Logger.log('retrieveSuggestedTextFromAPI response is ' + response);
-  response = response.toString();
-  prompt = prompt.toString();
-  var lengthOfPrompt = prompt.length;
-  var lengthOfResponse = response.length;
-  response = response.substring(lengthOfPrompt+1,lengthOfResponse);
-  response = response.trim();
-  Logger.log('retrieveSuggestedTextFromAPI response after subtraction of prompt is ' + response);
-  var firstLine = response.substring(0, response.indexOf(".")+1);
-  firstLine=firstLine.replace(/\\n/g,' ');
-  firstLine=firstLine.replace(/\\"/g,'"');
-  firstLine=firstLine.replace(/\\u2014 /g,'-- ');
-  Logger.log('retrieveSuggestedTextFromAPI firstLine is ' + firstLine);
-  Logger.log('exiting retrieveSuggestedTextFromAPI');
-  return firstLine;
+  var responseText = UrlFetchApp.fetch(url, options).getContentText("UTF-8");
+
+  Logger.log(typeof responseText) // string
+
+  // this replace is not working :(
+  responseText = responseText.replace('\n','<br>').replace('\u2019',"’");;
+
+
+  Logger.log('retrieveSuggestedTextFromAPI response is ' + responseText);
+
+  var responseNoPrompt = responseText.replace(prompt,'');
+
+  // response = response.substring(lengthOfPrompt+1,lengthOfResponse);
+  // response = response.trim();
+  Logger.log('retrieveSuggestedTextFromAPI response after subtraction of prompt is ' + responseNoPrompt);
+  //var firstLine = responseNoPrompt.substring(0, responseNoPrompt.indexOf(".")+1);
+  //Logger.log('retrieveSuggestedTextFromAPI firstLine is ' + firstLine);
+  //Logger.log('exiting retrieveSuggestedTextFromAPI');
+
+  return responseNoPrompt; //firstLine;
 }
