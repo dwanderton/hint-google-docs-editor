@@ -1,3 +1,18 @@
+// TODO: Where you see '<|endoftext|>' curtail the response as topic changes.
+
+//** HELPER FUNCTIONS
+
+function nthIndex(str, pat, n){
+    var L= str.length, i= -1;
+    while(n-- && i++<L){
+        i= str.indexOf(pat, i);
+        if (i < 0) break;
+    }
+    return i;
+}
+
+
+
 /**
  * @OnlyCurrentDoc
  *
@@ -370,24 +385,16 @@ function retrieveSuggestedTextFromAPI(prompt)
     'payload' : JSON.stringify(data)
   };
 
-  var responseText = UrlFetchApp.fetch(url, options).getContentText("UTF-8");
-
-  Logger.log(typeof responseText) // string
-
-  // this replace is not working :(
-  responseText = responseText.replace('\n','<br>').replace('\u2019',"’");;
-
+  var responseText = JSON.parse(UrlFetchApp.fetch(url, options).getContentText("UTF-8"));
 
   Logger.log('retrieveSuggestedTextFromAPI response is ' + responseText);
 
   var responseNoPrompt = responseText.replace(prompt,'');
 
-  // response = response.substring(lengthOfPrompt+1,lengthOfResponse);
-  // response = response.trim();
   Logger.log('retrieveSuggestedTextFromAPI response after subtraction of prompt is ' + responseNoPrompt);
-  //var firstLine = responseNoPrompt.substring(0, responseNoPrompt.indexOf(".")+1);
-  //Logger.log('retrieveSuggestedTextFromAPI firstLine is ' + firstLine);
-  //Logger.log('exiting retrieveSuggestedTextFromAPI');
+  var shortResponse = responseNoPrompt.substring(0, nthIndex(responseNoPrompt, ".", 2)+1);
+  Logger.log('retrieveSuggestedTextFromAPI firstLine is ' + shortResponse);
+  Logger.log('exiting retrieveSuggestedTextFromAPI');
 
-  return responseNoPrompt; //firstLine;
+  return shortResponse;
 }
