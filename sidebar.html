@@ -12,62 +12,42 @@
     </script>
 
     <base target="_top">
-    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-    <!-- The CSS package above applies Google styling to buttons and other elements. -->
-    <style>
-    .branding-below {
-      bottom: 56px;
-      top: 30px;
-    }
-    .branding-text {
-      left: 7px;
-      position: relative;
-      top: 3px;
-    }
-    .col-contain {
-      overflow: hidden;
-    }
-    .col-one {
-      float: center;
-      width: 50%;
-    }
-    .logo {
-      vertical-align: middle;
-    }
-    .radio-spacer {
-      height: 20px;
-    }
-    .width-100 {
-      width: 100%;
-    }
-    </style>
+
+
+    <!-- Libs CSS -->
+    <link rel="stylesheet" href="https://hintwriting.com/assets/fonts/Feather/feather.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/flickity/dist/flickity.min.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/flickity-fade/flickity-fade.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/aos/dist/aos.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/jarallax/dist/jarallax.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/highlightjs/styles/vs2015.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/@fancyapps/fancybox/dist/jquery.fancybox.min.css">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="https://hintwriting.com/assets/css/theme.min.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/css/custom.css">
+
   </head>
   <body>
-    <div class="sidebar branding-below" style="text-align: center;">
-
-      <img src="http://jinwu.ca/hint/hint_logo.png" class="center" alt="hint logo" height="100" width="100"><br />
-      <span style="center"><h1>hint</h1></span>
-      <span class="gray">inspiration is just a click away!<br /><br /></span>
-      <span class="secondary">Click on the "hint" button below to get started!<br /></span>
-      <div class="width-100" ><br />
-      <form>
-        <div class="block form-group">
-          <!--label for="insertedText"><b>Text Test</b></label-->
-          <textarea class="width-100" id="insertedText" rows="10"></textarea>
-        </div>
-        <div class="block" id="button-bar">
-          <button class="blue" id="run-hint">Hint</button>
-          <button id="insert-text">Insert</button>
-        </div>
-      </form>
-      <br /><br />
+  <div class="container" style="padding-top: 5%; padding-bottom: 5%;">
+    <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
+      <img src="https://hintwriting.com/assets/img/brand.png" class="navbar-brand-img" alt="hint logo">
+    </a>
+    <br/><br/>
+    <form>
+      <div class="form-group">
+        <textarea class="form-control is-valid" id="insertedText" rows="4"></textarea>
       </div>
-    </div>
-
-    <div class="sidebar bottom" style="text-align: center; vertical-align: middle; display:inline-block;">
-      <!--<img alt="Add-on logo" class="logo" src="http://jinwu.ca/hint/hint_logo.png" width="15" height="15">-->
-      <span class="gray branding-text">hintwriting.com</span>
-    </div>
+      <div class="block" id="button-bar">
+        <button class="btn btn-outline-primary shadow lift mr-1" id="run-hint">
+          Get a Hint
+        </button>
+        <button class="btn btn-outline-success shadow lift mr-1" id="insert-text">
+          Insert Text
+        </button>
+      </div>
+    </form>
+  </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
