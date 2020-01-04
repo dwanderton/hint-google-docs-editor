@@ -1,6 +1,10 @@
 // TODO: Where you see '<|endoftext|>' curtail the response as topic changes.
 
-//** HELPER FUNCTIONS
+//**
+//
+// START HELPER FUNCTIONS
+//
+//**
 
 function nthIndex(str, pat, n){
     var L= str.length, i= -1;
@@ -10,6 +14,13 @@ function nthIndex(str, pat, n){
     }
     return i;
 }
+
+//**
+//
+// END HELPER FUNCTIONS
+//
+//**
+
 
 
 
@@ -370,7 +381,7 @@ function insertText( newText )
 function retrieveSuggestedTextFromAPI(prompt)
 {
   Logger.log('entering retrieveSuggestedTextFromAPI');
-  var url = 'http://aacbd65622cc911eaa87d0286260640b-2049507335.us-west-2.elb.amazonaws.com/hint/api-v0';
+  var url = 'http://aecb0495b2e5e11ea9e7e06180fe4baa-242239220.us-west-2.elb.amazonaws.com/hint/api-v0';
 
   var data =
   {

@@ -27,6 +27,47 @@
     <link rel="stylesheet" href="https://hintwriting.com/assets/css/theme.min.css">
     <link rel="stylesheet" href="https://hintwriting.com/assets/css/custom.css">
 
+    <style>
+    /*
+    * typing styles
+    */
+
+    /* Cursor Styling */
+
+    .cursor::after {
+      content:'';
+      display:inline-block;
+      margin-left:3px;
+      background-color:black;
+      animation-name:blink;
+      animation-duration:0.5s;
+      animation-iteration-count: infinite;
+    }
+    h5.cursor::after {
+      height:13px;
+      width:6px;
+    }
+    p.cursor::after {
+      height:13px;
+      width:6px;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity:1;
+      }
+      49% {
+        opacity:1;
+      }
+      50% {
+        opacity:0;
+      }
+      100% {
+        opacity:0;
+      }
+    }
+    </style>
+
   </head>
   <body>
   <div class="container" style="padding-top: 5%; padding-bottom: 5%;">
@@ -36,7 +77,10 @@
     <br/><br/>
     <form>
       <div class="form-group">
-        <textarea class="form-control is-valid" id="insertedText" rows="4"></textarea>
+        <div class="output" id="output">
+          <p class="cursor"></p>
+        </div>
+        <!-- <textarea class="form-control is-valid"  rows="11" disabled></textarea> -->
       </div>
       <div class="block" id="button-bar">
         <button class="btn btn-outline-primary shadow lift mr-1" id="run-hint">
@@ -46,10 +90,102 @@
           Insert Text
         </button>
       </div>
+      <br/><br/>
+      <div id="error-bay">
+      </div>
     </form>
   </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+    /**
+    * typing https://codepen.io/daviddcarr/pen/XVyQMM
+    **/
+    // values to keep track of the number of letters typed, which quote to use. etc. Don't change these values.
+    var i = 0,
+        a = 0,
+        isBackspacing = false,
+        isParagraph = false;
+
+    // Typerwrite text content. Use a pipe to indicate the start of the second line "|".
+    var textArray = [
+      "What. The. The. LOL.",
+      "What do you call an alligator wearing a vest?|An Investigator",
+      "What do you call a fake noodle?|An Impasta",
+      "Why shouldn't you write with a broken pencil?|Because it's pointless",
+      "Why couldn't the pirate finish the alphabet?|He kept getting lost a C",
+      "What's brown and sticky?|A stick",
+      "What starts with an E, ends with an E and has one letter in it?|An Envelope",
+      "What has four wheels, and flies?|A Garbage truck",
+      "What do you call a pig that knows Karate?|Pork Chop",
+      "Why did the scarecrow get promoted?|He was out standing in his field.",
+      "I have a step ladder|I never knew my real ladder.",
+      "What kind of shoes do ninjas wear?|Sneakers"
+    ];
+
+    // Speed (in milliseconds) of typing.
+    var speedForward = 40, //Typing Speed
+        speedWait = 1000, // Wait between typing and backspacing
+        speedBetweenLines = 1000, //Wait between first and second lines
+        speedBackspace = 5; //Backspace Speed
+
+
+    function typeWriter(id, ar, isBackspacing=false) {
+      var element = $("#" + id),
+          aString = ar[a],
+          eParagraph = element.children("p"); //Subheader element
+
+      // Determine if animation should be typing or backspacing
+      if (!isBackspacing) {
+
+        // If full string hasn't yet been typed out, continue typing
+        if (i < aString.length) {
+          if (aString.charAt(i) == ".") {
+            eParagraph.text(eParagraph.text() + aString.charAt(i));
+            i++;
+            setTimeout(function(){ typeWriter(id, ar); }, speedBetweenLines);
+          } else {
+
+            eParagraph.text(eParagraph.text() + aString.charAt(i));
+            i++;
+            setTimeout(function(){ typeWriter(id, ar); }, speedForward);
+
+          }
+
+        // If full string has been typed
+        } else if (i == aString.length) {
+
+          // full string typed.
+          console.info("finsihed typing");
+
+          // TODO show insert and rehint button.
+
+          // isBackspacing = true;
+          // setTimeout(function(){ typeWriter(id, ar); }, speedWait);
+
+        }
+
+      // If backspacing is enabled
+      } else {
+
+        // If still has text, continue backspacing
+        if (eParagraph.text().length > 0) {
+          eParagraph.text(eParagraph.text().substring(0, eParagraph.text().length - 1));
+          setTimeout(function(){ typeWriter(id, ar, true); }, speedBackspace);
+
+        // If no text, complete.
+        } else {
+
+          i = 0;
+          // a = (a + 1) % ar.length; //Moves to next position in array, always looping back to 0
+          console.info("finsihed deleting");
+          // setTimeout(function(){ typeWriter(id, ar); }, 50);
+
+        }
+      }
+    }
+    </script>
+
     <script>
       /**
        * On document load, two buttons that the user can click on
@@ -59,6 +195,7 @@
         console.log('entering button functions');
         $('#run-hint').click(hintText);
         $('#insert-text').click(insertText);
+        $('p').click(function(){ typeWriter("output", [], true);});
         console.log('exiting button functions');
       });
 
@@ -67,22 +204,26 @@
        * the sidebar UI with the resulting text.
        */
       function hintText() {
-        gtag('event', 'query', { 'event_category' : 'engagement', method : 'hint-sidebar'});
+        gtag( 'event' , 'query', { 'event_category' : 'engagement', method : 'hint-sidebar' });
+        typeWriter("output", [], true);
         console.log('entering hintText');
         this.disabled = true;
         $('#error').remove();
         var originalText = $('input[name=origin]').val();
         google.script.run
             .withSuccessHandler(
-              function(response, element) {
-                $('#insertedText').val(response.suggestion);
+              function( response , element )
+              {
+                typeWriter("output", [response.suggestion]);
                 $('input[name=originalText]').val(response.suggestion);
                 console.info(response.suggestion)
+
+
                 element.disabled = false;
               })
             .withFailureHandler(
               function(msg, element) {
-                showError(msg, $('#button-bar'));
+                logError(msg);
                 element.disabled = false;
               })
              .withUserObject(this)
@@ -99,22 +240,25 @@
         console.log('entering insertText');
         //var originalText = $('input[name=origin]').val();
         this.disabled = true;
-        $('#error').remove();
-        google.script.run
+        typeWriter("output", [], true);
+          google.script.run
             .withSuccessHandler(
               function(returnSuccess, element) {
                 element.disabled = false;
-                //$('#insertedText').val(returnSuccess.suggestion);
+                //$('#textSuggestion').val(returnSuccess.suggestion);
                 //$('input[name=originalText]').val(returnSuccess.suggestion);
               })
             .withFailureHandler(
               function(msg, element) {
-                showError(msg, $('#button-bar'));
+                logError(msg);
                 element.disabled = false;
               })
             .withUserObject(this)
-            .insertText($('#insertedText').val())
+            .insertText($('#output').text())
             .getTextandGiveHint();
+
+        $('#error').remove();
+
             console.log('exiting insertText');
       }
 
@@ -124,9 +268,10 @@
        * @param {string} msg The error message to display.
        * @param {DOMElement} element The element after which to display the error.
        */
-      function showError(msg, element) {
-        var div = $('<div id="error" class="error">' + msg + '</div>');
-        $(element).after(div);
+      function logError(msg) {
+        gtag('event', 'exception', { 'description': msg, 'fatal' : true});
+        var div = $('<div class="alert alert-warning" role="alert"><strong>Oops!</strong><br/>Seems like something didn\'t quite work out. Contact <strong>hello@hintwriting.com</strong> for support!</div>');
+        $('#error-bay').append(div);
       }
     </script>
   </body>
