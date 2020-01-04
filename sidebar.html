@@ -35,6 +35,13 @@
       display:none;
     }
 
+    .pointer {
+      cursor: pointer;
+    }
+    .report-hint:hover {
+      color: #df4759!important;
+    }
+
     /*
     * typing styles
     */
@@ -83,19 +90,30 @@
     </a>
     <br/><br/>
     <form>
+      <div id="loading" style="display:none">
+        <div id="bm"></div>
+      </div>
       <div class="form-group">
-        <div class="output" id="output">
+        <div class="output" id="output" style="display:none">
           <p class="cursor"></p>
         </div>
-        <!-- <textarea class="form-control is-valid"  rows="11" disabled></textarea> -->
       </div>
-      <div class="block" id="button-bar">
-        <button class="btn btn-outline-primary shadow lift mr-1" id="run-hint">
-          Get a Hint
+      <div class="block text-center" id="button-bar-0">
+        <button class="btn btn-primary shadow lift mr-1 run-hint">
+          get a hint
         </button>
-        <button class="btn btn-outline-success shadow lift mr-1" id="insert-text">
-          Insert Text
+      </div>
+      <div class="block text-center" id="button-bar-1" style="display:none;">
+        <button class="btn btn-success shadow lift mr-1" id="insert-text">
+          insert
         </button>
+        <button class="btn btn-outline-primary shadow lift mr-1 run-hint">
+          <i class="fas fa-redo"></i> re-hint
+        </button>
+        <p class="text-muted p-3">
+          <a class="report-hint pointer"><i class="far fa-flag"></i> report this hint</a>
+          <!-- typos and grammar; incomplete; offensive/inappropriate - severe; offensive/inappropriate - mild; inaccurate -->
+        </p>
       </div>
       <br/><br/>
       <div id="error-bay">
@@ -104,6 +122,21 @@
   </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/c5ae9bac41.js" crossorigin="anonymous"></script>
+    <script src="https://hintwriting.com/assets/js/lottie.js"></script>
+    <script>
+    /* robot animation */
+    var animation = bodymovin.loadAnimation({
+      container: document.getElementById('bm'),
+      renderer: 'svg',
+      loop: true,
+      autoplay:true,
+      path: 'https://hintwriting.com/assets/img/robot-animation/data.json'
+    });
+
+    </script>
+
+
     <script>
     /**
     * typing https://codepen.io/daviddcarr/pen/XVyQMM
@@ -115,9 +148,9 @@
         isParagraph = false;
 
     // Speed (in milliseconds) of typing.
-    var speedForward = 40, //Typing Speed
+    var speedForward = 20, //Typing Speed
         speedWait = 1000, // Wait between typing and backspacing
-        speedBetweenLines = 1000, //Wait between first and second lines
+        speedBetweenLines = 800, //Wait between end of sentences
         speedBackspace = 5; //Backspace Speed
 
 
@@ -131,7 +164,7 @@
 
         // If full string hasn't yet been typed out, continue typing
         if (i < aString.length) {
-          if (aString.charAt(i) == ".") {
+          if (aString.charAt(i) == "." || aString.charAt(i) == "?" || aString.charAt(i) == ",") {
             eParagraph.text(eParagraph.text() + aString.charAt(i));
             i++;
             setTimeout(function(){ typeWriter(id, ar); }, speedBetweenLines);
@@ -184,7 +217,7 @@
 
       $(function() {
         console.log('entering button functions');
-        $('#run-hint').click(hintText);
+        $('.run-hint').click(hintText);
         $('#insert-text').click(insertText);
         console.log('exiting button functions');
       });
@@ -194,7 +227,9 @@
        * the sidebar UI with the resulting text.
        */
       function hintText() {
+        hideButtons();
         hideError();
+        $('#loading').show(1000);
         gtag( 'event' , 'query', { 'event_category' : 'engagement', method : 'hint-sidebar' });
         typeWriter("output", [], true);
         console.log('entering hintText');
@@ -205,18 +240,22 @@
             .withSuccessHandler(
               function( response , element )
               {
-                typeWriter("output", [response.suggestion]);
-                $('input[name=originalText]').val(response.suggestion);
-                console.info(response.suggestion)
-
+                $('#loading').hide("fast", function(){
+                  $('#output').show(0);
+                  typeWriter("output", [response.suggestion]);
+                  setTimeout(function(){$('#button-bar-1').show(1000);},1500);
+                });
 
                 element.disabled = false;
+
               })
             .withFailureHandler(
               function(msg, element) {
                 logError(msg, true);
                 element.disabled = false;
                 displayError();
+                $('#loading').hide();
+                $('#button-bar-0').show(1000);
               })
              .withUserObject(this)
              .getTextandGiveHint();
@@ -228,6 +267,7 @@
        * at the user's cursor or selection.
        */
       function insertText() {
+        hideButtons();
         hideError();
         gtag('event', 'insert', { 'event_category' : 'engagement', method : 'hint-sidebar'});
         console.log('entering insertText');
@@ -240,12 +280,14 @@
                 element.disabled = false;
                 //$('#textSuggestion').val(returnSuccess.suggestion);
                 //$('input[name=originalText]').val(returnSuccess.suggestion);
+                $('#button-bar-0').show(1000);
               })
             .withFailureHandler(
               function(msg, element) {
                 logError(msg, true);
                 displayError();
                 element.disabled = false;
+                $('#button-bar-0').show(1000);
               })
             .withUserObject(this)
             .insertText($('#output').text())
@@ -272,6 +314,9 @@
       }
       function hideError(){
         $('#error-bay').hide("fast");
+      }
+      function hideButtons(){
+        $('form [id^="button-bar-"]').hide("fast");
       }
     </script>
   </body>
