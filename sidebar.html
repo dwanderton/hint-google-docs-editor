@@ -38,7 +38,7 @@
     .pointer {
       cursor: pointer;
     }
-    .report-hint:hover {
+    .flag-hint:hover {
       color: #df4759!important;
     }
 
@@ -90,7 +90,7 @@
     </a>
     <br/><br/>
     <form>
-      <div id="loading" style="display:none">
+      <div id="loading" class="block">
         <div id="bm"></div>
       </div>
       <div class="form-group">
@@ -107,11 +107,11 @@
         <button class="btn btn-success shadow lift mr-1" id="insert-text">
           insert
         </button>
-        <button class="btn btn-outline-primary shadow lift mr-1 run-hint">
+        <button class="btn btn-outline-primary shadow lift mr-1 run-hint re-hint">
           <i class="fas fa-redo"></i> re-hint
         </button>
         <p class="text-muted p-3">
-          <a class="report-hint pointer"><i class="far fa-flag"></i> report this hint</a>
+          <a class="flag-hint pointer"><i class="far fa-flag"></i> flag this hint</a>
           <!-- typos and grammar; incomplete; offensive/inappropriate - severe; offensive/inappropriate - mild; inaccurate -->
         </p>
       </div>
@@ -130,7 +130,7 @@
       container: document.getElementById('bm'),
       renderer: 'svg',
       loop: true,
-      autoplay:true,
+      autoplay: false,
       path: 'https://hintwriting.com/assets/img/robot-animation/data.json'
     });
 
@@ -154,33 +154,58 @@
         speedBackspace = 5; //Backspace Speed
 
 
-    function typeWriter(id, ar, isBackspacing=false) {
-      var element = $("#" + id),
-          aString = ar[a],
-          eParagraph = element.children("p"); //Subheader element
+    function typeWriter( id , ar , isBackspacing=false ) {
+      var element = $( "#" + id ),
+          aString = ar[ a ],
+          eParagraph = element.children( "p" ); //Subheader element
+
+      if ( !eParagraph.hasClass( "cursor" ) )
+      {
+
+        eParagraph.addClass( "cursor" );
+
+      }
 
       // Determine if animation should be typing or backspacing
-      if (!isBackspacing) {
+      if ( !isBackspacing )
+      {
 
         // If full string hasn't yet been typed out, continue typing
-        if (i < aString.length) {
-          if (aString.charAt(i) == "." || aString.charAt(i) == "?" || aString.charAt(i) == ",") {
-            eParagraph.text(eParagraph.text() + aString.charAt(i));
-            i++;
-            setTimeout(function(){ typeWriter(id, ar); }, speedBetweenLines);
-          } else {
+        if ( i < aString.length )
+        {
 
-            eParagraph.text(eParagraph.text() + aString.charAt(i));
+          if ( aString.charAt(i) == "." || aString.charAt(i) == "?" || aString.charAt(i) == "," )
+          {
+
+            eParagraph.text( eParagraph.text() + aString.charAt(i) );
             i++;
-            setTimeout(function(){ typeWriter(id, ar); }, speedForward);
+            setTimeout( function(){ typeWriter(id, ar); }, speedBetweenLines );
+
+          }
+          else
+          {
+
+            eParagraph.text( eParagraph.text() + aString.charAt(i) );
+            i++;
+            setTimeout( function(){ typeWriter(id, ar); }, speedForward );
 
           }
 
         // If full string has been typed
-        } else if (i == aString.length) {
+        }
+        else if ( i == aString.length )
+        {
 
           // full string typed.
           console.info("finsihed typing");
+          eParagraph.removeClass("cursor");
+          lottie.pause();
+          $('#loading' ).hide( 'fast' , function()
+          {
+            $( '#button-bar-1' ).slideDown( 600 );
+            $( '#loading' ).animate({ width: '+=80%' , height: '+=80%' }, 0 );
+
+          });
 
           // TODO show insert and rehint button.
 
@@ -203,6 +228,9 @@
           i = 0;
           // a = (a + 1) % ar.length; //Moves to next position in array, always looping back to 0
           console.info("finsihed deleting");
+          eParagraph.removeClass("cursor");
+          $('#loading').show("fast");
+
           // setTimeout(function(){ typeWriter(id, ar); }, 50);
 
         }
@@ -211,25 +239,26 @@
     </script>
 
     <script>
-      /**
-       * On document load, two buttons that the user can click on
-       */
 
       $(function() {
-        console.log('entering button functions');
         $('.run-hint').click(hintText);
+        $('.flag-hint').click(flaghint);
         $('#insert-text').click(insertText);
-        console.log('exiting button functions');
+        var currentHint = "";
       });
 
       /**
        * Runs a server-side function to fetch text based on user inputs
        * the sidebar UI with the resulting text.
        */
-      function hintText() {
+      function hintText ( event ) {
+        if ( $(event.target).hasClass('re-hint') )
+        {
+          gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': currentHint});
+        }
         hideButtons();
         hideError();
-        $('#loading').show(1000);
+        lottie.play();
         gtag( 'event' , 'query', { 'event_category' : 'engagement', method : 'hint-sidebar' });
         typeWriter("output", [], true);
         console.log('entering hintText');
@@ -240,10 +269,10 @@
             .withSuccessHandler(
               function( response , element )
               {
-                $('#loading').hide("fast", function(){
+                currentHint = response.suggestion;
+                $('#loading').animate({ width: '-=80%', height: '-=80%' }, 500, function(){
                   $('#output').show(0);
                   typeWriter("output", [response.suggestion]);
-                  setTimeout(function(){$('#button-bar-1').show(1000);},1500);
                 });
 
                 element.disabled = false;
@@ -255,7 +284,7 @@
                 element.disabled = false;
                 displayError();
                 $('#loading').hide();
-                $('#button-bar-0').show(1000);
+                $('#button-bar-0').slideDown(600);
               })
              .withUserObject(this)
              .getTextandGiveHint();
@@ -280,43 +309,48 @@
                 element.disabled = false;
                 //$('#textSuggestion').val(returnSuccess.suggestion);
                 //$('input[name=originalText]').val(returnSuccess.suggestion);
-                $('#button-bar-0').show(1000);
+
+                // factor out into function
+                $('#loading').show("fast");
+                $('#button-bar-0').slideDown(600);
               })
             .withFailureHandler(
               function(msg, element) {
                 logError(msg, true);
                 displayError();
                 element.disabled = false;
-                $('#button-bar-0').show(1000);
+
+                // factor out into function
+                $('#loading').show("fast");
+                $('#button-bar-0').slideDown(600);
               })
             .withUserObject(this)
             .insertText($('#output').text())
             .getTextandGiveHint();
 
-        $('#error').remove();
-
             console.log('exiting insertText');
       }
 
-      /**
-       * Inserts a div that contains an error message after a given element.
-       *
-       * @param {string} msg The error message to display.
-       * @param {DOMElement} element The element after which to display the error.
-       */
+      function flaghint (issue=0) {
+        gtag('event', 'flag-hint', { 'event_category': 'engagement', 'event_label': currentHint, 'event_value': issue});
+      }
+
+
+
+
       function logError(msg, fatal) {
         gtag('event', 'exception', { 'description': msg, 'fatal' : fatal});
       }
       function displayError(){
         var div = $('<div class="alert alert-warning" role="alert"><strong>Oops!</strong><br/>Seems like something didn\'t quite work out. Contact <strong>hello@hintwriting.com</strong> for support!</div>');
         $('#error-bay').html(div);
-        $('#error-bay').show("slow");
+        $('#error-bay').slideDown("slow");
       }
       function hideError(){
-        $('#error-bay').hide("fast");
+        $('#error-bay').slideUp("fast");
       }
       function hideButtons(){
-        $('form [id^="button-bar-"]').hide("fast");
+        $('form [id^="button-bar-"]').slideUp("fast");
       }
     </script>
   </body>

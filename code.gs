@@ -403,7 +403,15 @@ function retrieveSuggestedTextFromAPI(prompt)
   var responseNoPrompt = responseText.replace(prompt,'');
 
   Logger.log('retrieveSuggestedTextFromAPI response after subtraction of prompt is ' + responseNoPrompt);
-  var shortResponse = responseNoPrompt.substring(0, nthIndex(responseNoPrompt, ".", 2)+1);
+
+  cutResponseIndex = nthIndex(responseNoPrompt, ". ", 2);
+
+  if ( cutResponseIndex === -1 )
+  {
+    cutResponseIndex = nthIndex(responseNoPrompt, ". ", 1);
+  }
+
+  var shortResponse = responseNoPrompt.substring(0, cutResponseIndex+1);
   Logger.log('retrieveSuggestedTextFromAPI firstLine is ' + shortResponse);
   Logger.log('exiting retrieveSuggestedTextFromAPI');
 
