@@ -95,7 +95,7 @@
       </div>
       <div class="form-group">
         <div class="output" id="output" style="display:none">
-          <p class="cursor"></p>
+          <p class="cursor" id="output-paragraph" contenteditable></p>
         </div>
       </div>
       <div class="block text-center" id="button-bar-0">
@@ -202,7 +202,7 @@
           lottie.pause();
           $('#loading' ).hide( 'fast' , function()
           {
-            $( '#button-bar-1' ).slideDown( 600 );
+            $( '#button-bar-1' ).slideDown( 600 , function(){$( '#output-paragraph' ).focus();});
             $( '#loading' ).animate({ width: '+=80%' , height: '+=80%' }, 0 );
 
           });
@@ -256,6 +256,7 @@
         {
           gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': currentHint});
         }
+        $('#output').hide();
         hideButtons();
         hideError();
         lottie.play();
@@ -281,9 +282,9 @@
             .withFailureHandler(
               function(msg, element) {
                 logError(msg, true);
+                lottie.pause();
                 element.disabled = false;
                 displayError();
-                $('#loading').hide();
                 $('#button-bar-0').slideDown(600);
               })
              .withUserObject(this)
@@ -342,7 +343,7 @@
         gtag('event', 'exception', { 'description': msg, 'fatal' : fatal});
       }
       function displayError(){
-        var div = $('<div class="alert alert-warning" role="alert"><strong>Oops!</strong><br/>Seems like something didn\'t quite work out. Contact <strong>hello@hintwriting.com</strong> for support!</div>');
+        var div = $('<div class="alert alert-warning" role="alert"><strong>Oops!</strong><br/>Seems like something didn\'t quite work out. Email <strong>hello@hintwriting.com</strong> for support!</div>');
         $('#error-bay').html(div);
         $('#error-bay').slideDown("slow");
       }

@@ -381,7 +381,7 @@ function insertText( newText )
 function retrieveSuggestedTextFromAPI(prompt)
 {
   Logger.log('entering retrieveSuggestedTextFromAPI');
-  var url = 'http://aecb0495b2e5e11ea9e7e06180fe4baa-242239220.us-west-2.elb.amazonaws.com/hint/api-v0';
+  var url = 'http://ae7dafded316511eab1fb0eb612f22d6-278490164.us-west-2.elb.amazonaws.com/hint/api-v0';
 
   var data =
   {
