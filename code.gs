@@ -31,14 +31,9 @@ function regexpatIndex(str){
       Logger.log( "i : " + i )
       match = strcpy.match( regexpat );
       match[ "index" ] = match[ "index" ] + 2;
-      Logger.log("before: " + strcpy )
-      Logger.log(match['index'])
       strcpy = removeByIndex( strcpy , match[ "index" ] );
-      Logger.log("after: " + strcpy )
-      Logger.log(match)
       matches.push( match['index']+i);
       i += 1
-      Logger.log( matches );
       if (i > 10){
        return [];
       }
@@ -122,8 +117,31 @@ function showSidebar()
 
   Logger.log( 'entering showSidebar' );
 
+  var EditorArray = DocumentApp.getActiveDocument().getEditors();
+  var uid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  var docuid = new Date().getTime().toString() + '_' + uid;
+  for (var i = 0; i < EditorArray.length; i++) {
+    // Iterate over numeric indexes from 0 to 5, as everyone expects.
+
+    if (EditorArray[i].getEmail().indexOf("hintwriting.com") === -1) // https://stackoverflow.com/a/47486826/3700836
+    {
+      var formData = {
+        'entry.419624731': EditorArray[i].getEmail(), //email
+        'entry.352867374': docuid, // docuid
+      };
+      var options = {
+        'method' : 'post',
+        'payload' : formData
+      };
+      UrlFetchApp.fetch('https://docs.google.com/forms/d/e/1FAIpQLScud92qQahNkNZaeF1X4fS_rglVbF3NSCTy_AL4ZrQHWmJoug/formResponse', options);
+
+    }
+  }
+
   var ui = HtmlService.createHtmlOutputFromFile( 'sidebar' )
       .setTitle( 'hint' );
+
+
 
   DocumentApp.getUi().showSidebar( ui );
 
