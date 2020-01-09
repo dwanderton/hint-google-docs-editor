@@ -28,11 +28,21 @@ function regexpatIndex(str){
     var match;
     var strcpy = str
     while ( strcpy.match( regexpat ) !== null ){
+      Logger.log( "i : " + i )
       match = strcpy.match( regexpat );
-      match[ "index" ] = match[ "index" ] + 1 + i;
+      match[ "index" ] = match[ "index" ] + 2;
+      Logger.log("before: " + strcpy )
+      Logger.log(match['index'])
       strcpy = removeByIndex( strcpy , match[ "index" ] );
-      matches.push( match );
+      Logger.log("after: " + strcpy )
+      Logger.log(match)
+      matches.push( match['index']+i);
       i += 1
+      Logger.log( matches );
+      if (i > 10){
+       return [];
+      }
+
     }
     return matches;
 }
@@ -223,15 +233,23 @@ function getTextandGiveHint()
   Logger.log( 'entering getTextandGiveHint' );
 
 
-    var body = DocumentApp.getActiveDocument().getBody();
-    var prompt = body.getText();
+  var body = DocumentApp.getActiveDocument().getBody();
+  var prompt = body.getText();
 
 
   Logger.log( 'getTextandGiveHint prompt is' + prompt );
   Logger.log( 'prompt length: ' + prompt.length );
 
-  var suggestedText = retrieveSuggestedTextFromAPI( prompt );
+  var suggestedText = "";
 
+  if ( prompt.length < 180 )
+  {
+    suggestedText = "I'll be able to help you with a hint after you write a little more! Keep going and ask for a hint again once you are ready for inspiration.";
+  }
+  else
+  {
+    suggestedText = retrieveSuggestedTextFromAPI( prompt );
+  }
   Logger.log( 'getTextandGiveHint text is' + suggestedText );
   Logger.log('exiting getTextandGiveHint');
   return { suggestion: suggestedText };
@@ -459,10 +477,10 @@ function retrieveSuggestedTextFromAPI(prompt)
   {
     Logger.log('return full response');
     return responseNoPrompt;
-  } 
+  }
   else
   {
-    Logger.log('return short response : ' + responseNoPrompt.substring( 0, cutIndexArray[1]["index"] ) + ".");
-    return responseNoPrompt.substring( 0, cutIndexArray[1]["index"] );
+    Logger.log('return short response : ' + responseNoPrompt.substring( 0, cutIndexArray[1] ));
+    return responseNoPrompt.substring( 0, cutIndexArray[1] );
   }
 }
