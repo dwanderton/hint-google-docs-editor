@@ -1,10 +1,17 @@
-// TODO: Where you see '<|endoftext|>' curtail the response as topic changes.
-
 //**
 //
 // START HELPER FUNCTIONS
 //
 //**
+var regexpat = /[^\d][(.|?|!)](?=\s|$)/mi // no global to enable, string.match to return index
+
+function removeByIndex(str,index) {
+  if (index==0) {
+      return  str.slice(1)
+  } else {
+      return str.slice(0,index-1) + str.slice(index);
+  }
+}
 
 function nthIndex(str, pat, n){
     var L= str.length, i= -1;
@@ -13,6 +20,21 @@ function nthIndex(str, pat, n){
         if (i < 0) break;
     }
     return i;
+}
+
+function regexpatIndex(str){
+    var matches = [];
+    var i = 1
+    var match;
+    var strcpy = str
+    while ( strcpy.match( regexpat ) !== null ){
+      match = strcpy.match( regexpat );
+      match[ "index" ] = match[ "index" ] + 1 + i;
+      strcpy = removeByIndex( strcpy , match[ "index" ] );
+      matches.push( match );
+      i += 1
+    }
+    return matches;
 }
 
 //**
@@ -199,10 +221,14 @@ function getTextandGiveHint()
 {
 
   Logger.log( 'entering getTextandGiveHint' );
-  var body = DocumentApp.getActiveDocument().getBody();
-  var prompt = body.getText();
+
+
+    var body = DocumentApp.getActiveDocument().getBody();
+    var prompt = body.getText();
+
 
   Logger.log( 'getTextandGiveHint prompt is' + prompt );
+  Logger.log( 'prompt length: ' + prompt.length );
 
   var suggestedText = retrieveSuggestedTextFromAPI( prompt );
 
@@ -230,13 +256,19 @@ function insertText( newText )
   if ( selection )
   {
 
+    /*
+    *
+    *  hint insertion with text selection.
+    *
+    */
+
     var replaced = false;
     var elements = selection.getSelectedElements();
 
     if ( elements.length === 1 && elements[0].getElement().getType() === DocumentApp.ElementType.INLINE_IMAGE )
     {
 
-      throw new Error('Can\'t insert text into an image.');
+      throw new Error('Can\'t insert hint into an image.');
 
     }
 
@@ -290,7 +322,7 @@ function insertText( newText )
         if ( !replaced && element.editAsText )
         {
 
-          // Only translate elements that can be edited as text, removing other
+          // Only add hint to elements that can be edited as text, removing other
           // elements.
           element.clear();
           element.asText().setText(newText);
@@ -319,13 +351,23 @@ function insertText( newText )
     }
   } else {
 
+
+    /*
+    *
+    * hint insertion with no text selection, just a cursor position.
+    *
+    */
+
     var cursor = DocumentApp.getActiveDocument().getCursor();
     var surroundingText = cursor.getSurroundingText().getText();
+    Logger.log("surroundingText is: " + surroundingText);
+
     var surroundingTextOffset = cursor.getSurroundingTextOffset();
+    Logger.log("surroundingTextOffset is: " + surroundingTextOffset);
 
     // If the cursor follows or preceds a non-space character, insert a space
-    // between the character and the translation. Otherwise, just insert the
-    // translation.
+    // between the character and the hint. Otherwise, just insert the
+    // hint.
 
     if ( surroundingTextOffset > 0 )
     {
@@ -404,16 +446,23 @@ function retrieveSuggestedTextFromAPI(prompt)
 
   Logger.log('retrieveSuggestedTextFromAPI response after subtraction of prompt is ' + responseNoPrompt);
 
-  cutResponseIndex = nthIndex(responseNoPrompt, ". ", 2);
-
-  if ( cutResponseIndex === -1 )
+    cutEOTIndex = nthIndex(responseNoPrompt, "<|endoftext|>", 1);
+  if ( cutEOTIndex !== -1 )
   {
-    cutResponseIndex = nthIndex(responseNoPrompt, ". ", 1);
+    responseNoPrompt = responseNoPrompt.substring( 0 , cutEOTIndex);
   }
 
-  var shortResponse = responseNoPrompt.substring(0, cutResponseIndex+1);
-  Logger.log('retrieveSuggestedTextFromAPI firstLine is ' + shortResponse);
-  Logger.log('exiting retrieveSuggestedTextFromAPI');
+  cutIndexArray = regexpatIndex(responseNoPrompt);
 
-  return shortResponse;
+  // if the array length of periods is less than 2, then return whole response.
+  if (cutIndexArray.length < 2)
+  {
+    Logger.log('return full response');
+    return responseNoPrompt;
+  } 
+  else
+  {
+    Logger.log('return short response : ' + responseNoPrompt.substring( 0, cutIndexArray[1]["index"] ) + ".");
+    return responseNoPrompt.substring( 0, cutIndexArray[1]["index"] );
+  }
 }
