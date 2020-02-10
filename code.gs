@@ -251,8 +251,35 @@ function getTextandGiveHint()
   Logger.log( 'entering getTextandGiveHint' );
 
 
-  var body = DocumentApp.getActiveDocument().getBody();
-  var prompt = body.getText();
+  /*
+  * Simple cursor capture v0 2020-02-10
+  *
+  * Capture cursor paragraph, if too short use all of the body text (up to a length that prevents API from freaking out)
+  * to improve: ideally if the para is too short, this function would use other nearby paragraphs for context - currently it just uses the last part of the body text.
+  */
+
+  var cursor = DocumentApp.getActiveDocument().getCursor();
+  var surroundingText = cursor.getSurroundingText().getText();
+  Logger.log("surroundingText is: " + surroundingText);
+
+  var prompt = surroundingText;
+
+  if( prompt.length < 180 )
+  {
+    Logger.log("prompt too short");
+    var bodyText = DocumentApp.getActiveDocument().getBody().getText();
+
+    Logger.log(bodyText.length)
+    if( bodyText.length > 1000 )
+    {
+      Logger.log("adjust length of prompt")
+      prompt = bodyText.slice( bodyText.length - 1000 );
+    }
+    else
+    {
+      prompt = bodyText
+    }
+  }
 
 
   Logger.log( 'getTextandGiveHint prompt is' + prompt );

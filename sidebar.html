@@ -340,6 +340,7 @@
 
 
       function logError(msg, fatal) {
+        console.error(msg);
         gtag('event', 'exception', { 'description': msg, 'fatal' : fatal});
       }
       function displayError(){
