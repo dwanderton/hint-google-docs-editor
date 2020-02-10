@@ -287,6 +287,9 @@ function insertText( newText )
 
   Logger.log( 'entering newText' );
 
+  // clean new text fof aditional spaces
+  newText = newText.trim()
+
   var selection = DocumentApp.getActiveDocument().getSelection();
 
   if ( selection )
@@ -426,7 +429,6 @@ function insertText( newText )
       }
 
     }
-
     cursor.insertText( newText );
 
     Logger.log( 'newText newText is' + newText );
