@@ -118,21 +118,30 @@ function showSidebar()
   Logger.log( 'entering showSidebar' );
 
   var EditorArray = DocumentApp.getActiveDocument().getEditors();
-  var uid = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  var docuid = new Date().getTime().toString() + '_' + uid;
-  for (var i = 0; i < EditorArray.length; i++) {
-    // Iterate over numeric indexes from 0 to 5, as everyone expects.
+  var docuid = DocumentApp.getActiveDocument().getId();
+
+  var date_today = new Date();
+  var today_year = date_today.getFullYear();
+  var today_month = ("0" + (date_today.getMonth() + 1)).slice(-2);
+  var today_day = ("0" + date_today.getDate()).slice(-2);
+  var datestring = today_year + '-' + today_month + '-' + today_day;
+
+  for ( var i = 0; i < EditorArray.length; i++ )
+  {
+    // Iterate over numeric indexes from 0 to length, as everyone expects.
 
     if (EditorArray[i].getEmail().indexOf("hintwriting.com") === -1) // https://stackoverflow.com/a/47486826/3700836
     {
       var formData = {
-        'entry.419624731': EditorArray[i].getEmail(), //email
-        'entry.352867374': docuid, // docuid
+        'entry.419624731' : EditorArray[i].getEmail(), //email
+        'entry.352867374' : docuid, // docuid
+        'entry.501922370' : datestring
       };
       var options = {
         'method' : 'post',
         'payload' : formData
       };
+
       UrlFetchApp.fetch('https://docs.google.com/forms/d/e/1FAIpQLScud92qQahNkNZaeF1X4fS_rglVbF3NSCTy_AL4ZrQHWmJoug/formResponse', options);
 
     }

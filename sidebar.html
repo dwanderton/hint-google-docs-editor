@@ -29,6 +29,16 @@
 
     <style>
     /*
+    Footer as the absolute footer
+    */
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: .2rem;            /* Footer height */
+    }
+
+    /*
     * misc styles
     */
     #error-bay {
@@ -85,6 +95,9 @@
   </head>
   <body>
   <div class="container" style="padding-top: 5%; padding-bottom: 5%;">
+    <div id="shareAlert" class="alert alert-success" role="alert" style="position:absolute;display:none;">
+      link is in your clipboard!
+    </div>
     <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
       <img src="https://hintwriting.com/assets/img/brand.png" class="navbar-brand-img" alt="hint logo">
     </a>
@@ -110,6 +123,10 @@
         <button class="btn btn-outline-primary shadow lift mr-1 run-hint re-hint">
           <i class="fas fa-redo"></i> re-hint
         </button>
+        <br><br>
+        <button class="btn btn-outline-danger shadow lift mr-1" id="reject-text">
+          <i class="fas fa-times"></i> reject
+        </button>
         <p class="text-muted p-3">
           <a class="flag-hint pointer"><i class="far fa-flag"></i> flag this hint</a>
           <!-- typos and grammar; incomplete; offensive/inappropriate - severe; offensive/inappropriate - mild; inaccurate -->
@@ -119,12 +136,21 @@
       <div id="error-bay">
       </div>
     </form>
+    <!--
+    <footer>
+      <div class="container">
+        <small class="text-muted" onclick="copyShareHint()" style="cursor:pointer;">click <strong>here</strong> to share hint!</small>
+      </div>
+    </footer>
+  -->
   </div>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://kit.fontawesome.com/c5ae9bac41.js" crossorigin="anonymous"></script>
-    <script src="https://hintwriting.com/assets/js/lottie.js"></script>
-    <script>
+  <!-- end of page -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://kit.fontawesome.com/c5ae9bac41.js" crossorigin="anonymous"></script>
+  <script src="https://hintwriting.com/assets/js/lottie.js"></script>
+  <script>
     /* robot animation */
     var animation = bodymovin.loadAnimation({
       container: document.getElementById('bm'),
@@ -240,10 +266,12 @@
 
     <script>
 
+
       $(function() {
         $('.run-hint').click(hintText);
         $('.flag-hint').click(flaghint);
         $('#insert-text').click(insertText);
+        $('#reject-text').click(rejectText);
         var currentHint = "";
       });
 
@@ -332,6 +360,19 @@
             console.log('exiting insertText');
       }
 
+      function rejectText() {
+        hideButtons();
+        hideError();
+        gtag('event', 'reject', { 'event_category' : 'engagement', method : 'hint-sidebar'});
+        console.log('entering rejectText');
+        //var originalText = $('input[name=origin]').val();
+        this.disabled = true;
+        typeWriter("output", [], true);
+        $('#loading').show("fast");
+        $('#button-bar-0').slideDown(600);
+        console.log('exiting rejectText');
+      }
+
       function flaghint (issue=0) {
         gtag('event', 'flag-hint', { 'event_category': 'engagement', 'event_label': currentHint, 'event_value': issue});
       }
@@ -354,6 +395,18 @@
       function hideButtons(){
         $('form [id^="button-bar-"]').slideUp("fast");
       }
+
+      function copyShareHint() {
+       $('#shareAlert').fadeIn();
+       // Create temp element off-screen to hold text.
+       var tempElem = $('<textarea style="position: absolute; top: -8888px; left: -8888px">');
+       $("body").append(tempElem);
+       tempElem.val("I suggest you try out hint if you are getting stuck: http://bit.ly/givehint-gdocs").select();
+       document.execCommand("copy");
+       tempElem.remove();
+       setTimeout(function(){ $('#shareAlert').fadeOut(); },2000);
+      }
+
     </script>
   </body>
 </html>
