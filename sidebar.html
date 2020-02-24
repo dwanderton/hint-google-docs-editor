@@ -52,6 +52,11 @@
       color: #df4759!important;
     }
 
+    .btn-category {
+      padding-top: 3px;
+      padding-bottom: 3px
+    }
+
     /*
     * typing styles
     */
@@ -101,15 +106,19 @@
     <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
       <img src="https://hintwriting.com/assets/img/brand.png" class="navbar-brand-img" alt="hint logo">
     </a>
-    <i class="fas fa-share-alt share-hint text-primary" style="padding-left:150px; font-size: 1.2em; cursor:pointer;"></i>
+
+    <i class="fas fa-share-alt share-hint text-primary" style="position: absolute; right: 20px; top: 30px; font-size: 1.2em; cursor:pointer;"></i>
     <br/><br/>
     <form>
       <div id="category-questions">
         <p class="lead">What type of writing will you be doing today?</p>
-        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="blog">blog</button>
-        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="business">business reporting</button>
-        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="legal">legal briefs</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="marketing">marketing</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="business">business writing</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="legal">legal</button>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="school">school</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="creative">creative writing</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="journalism">journalism</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="other">other</button>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="noidea">no idea</button>
       </div>
 
@@ -137,10 +146,11 @@
         <button class="btn btn-outline-danger shadow lift mr-1" id="reject-text">
           <i class="fas fa-times"></i> reject
         </button>
-        <p class="text-muted p-3">
+        <!-- <p class="text-muted p-3">
           <a class="flag-hint pointer"><i class="far fa-flag"></i> flag this hint</a>
           <!-- typos and grammar; incomplete; offensive/inappropriate - severe; offensive/inappropriate - mild; inaccurate -->
-        </p>
+          <!--
+        </p> -->
       </div>
       <br/><br/>
       <div id="error-bay">
