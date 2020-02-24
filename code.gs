@@ -180,7 +180,7 @@ function submitCatergory (categoryString) {
   {
     var formData = {
       'entry.136409957' : categoryString,
-      'entry.419624731' : EditorArray[i].getEmail(), //email
+      'entry.419624731' : EditorArray[0].getEmail(), //email
       'entry.352867374' : docuid, // docuid
       'entry.501922370' : datestring
     };
