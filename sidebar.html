@@ -96,14 +96,24 @@
   <body>
   <div class="container" style="padding-top: 5%; padding-bottom: 5%;">
     <div id="shareAlert" class="alert alert-success" role="alert" style="position:absolute;display:none;">
-      link is in your clipboard!
+      share link is in your clipboard!
     </div>
     <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
       <img src="https://hintwriting.com/assets/img/brand.png" class="navbar-brand-img" alt="hint logo">
     </a>
+    <i class="fas fa-share-alt share-hint text-primary" style="padding-left:150px; font-size: 1.2em; cursor:pointer;"></i>
     <br/><br/>
     <form>
-      <div id="loading" class="block">
+      <div id="category-questions">
+        <p class="lead">What type of writing will you be doing today?</p>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="blog">blog</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="business">business reporting</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="legal">legal briefs</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="school">school</button>
+        <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="noidea">no idea</button>
+      </div>
+
+      <div id="loading" class="block" style="display:none;">
         <div id="bm"></div>
       </div>
       <div class="form-group">
@@ -111,7 +121,7 @@
           <p class="cursor" id="output-paragraph" contenteditable></p>
         </div>
       </div>
-      <div class="block text-center" id="button-bar-0">
+      <div class="block text-center" id="button-bar-0" style="display:none;">
         <button class="btn btn-primary shadow lift mr-1 run-hint">
           get a hint
         </button>
@@ -230,7 +240,6 @@
           {
             $( '#button-bar-1' ).slideDown( 600 , function(){$( '#output-paragraph' ).focus();});
             $( '#loading' ).animate({ width: '+=80%' , height: '+=80%' }, 0 );
-
           });
 
           // TODO show insert and rehint button.
@@ -268,12 +277,36 @@
 
 
       $(function() {
+        $('.btn-category').click(catqReport)
         $('.run-hint').click(hintText);
         $('.flag-hint').click(flaghint);
         $('#insert-text').click(insertText);
         $('#reject-text').click(rejectText);
+        $('.share-hint').click(copyShareHint);
         var currentHint = "";
       });
+
+      /**
+      *  Runs a server-side function to set user category
+      */
+      function catqReport (event){
+        $( '.btn-category' ).attr( "disabled" , true )
+        reportCategory = $( event.target ).data( 'value' );
+        $( '#category-questions' ).hide( 'fast' );
+        google.script.run
+            .withSuccessHandler(
+            function( response , element )
+            {
+                $( '#loading' ).slideDown( 600 , function() { $( '#button-bar-0' ).slideDown( 300 ); });
+            })
+            .withFailureHandler(
+              function( msg , element ) {
+                logError( msg, true );
+                $( '#loading' ).slideDown( 600 , function() { $( '#button-bar-0' ).slideDown( 300 ); });
+              })
+             .withUserObject( this )
+             .submitCatergory( reportCategory );
+      }
 
       /**
        * Runs a server-side function to fetch text based on user inputs
@@ -299,13 +332,28 @@
               function( response , element )
               {
                 currentHint = response.suggestion;
-                $('#loading').animate({ width: '-=80%', height: '-=80%' }, 500, function(){
-                  $('#output').show(0);
-                  typeWriter("output", [response.suggestion]);
-                });
+                if(response.nohint)
+                {
+                  $('#output').html("<p>" + response.suggestion + "</p>").show(500);
+                  $('#loading' ).hide( 'fast' , function()
+                  {
+                    lottie.pause();
+                    setTimeout(function(){ rejectText(true); }, 5000);
 
-                element.disabled = false;
+                  });
 
+
+                  element.disabled = false;
+                }
+                else
+                {
+                  $('#loading').animate({ width: '-=80%', height: '-=80%' }, 500, function(){
+                    $('#output').show(0).attr("contenteditable", "true");
+                    typeWriter("output", [response.suggestion]);
+                  });
+
+                  element.disabled = false;
+                }
               })
             .withFailureHandler(
               function(msg, element) {
@@ -360,10 +408,10 @@
             console.log('exiting insertText');
       }
 
-      function rejectText() {
+      function rejectText(nohint) {
         hideButtons();
         hideError();
-        gtag('event', 'reject', { 'event_category' : 'engagement', method : 'hint-sidebar'});
+        if(!nohint){ gtag('event', 'reject', { 'event_category' : 'engagement', method : 'hint-sidebar'}); }
         console.log('entering rejectText');
         //var originalText = $('input[name=origin]').val();
         this.disabled = true;
@@ -401,7 +449,7 @@
        // Create temp element off-screen to hold text.
        var tempElem = $('<textarea style="position: absolute; top: -8888px; left: -8888px">');
        $("body").append(tempElem);
-       tempElem.val("I suggest you try out hint if you are getting stuck: http://bit.ly/givehint-gdocs").select();
+       tempElem.val("try out hint to supercharge your writing: http://bit.ly/givehint-gdocs").select();
        document.execCommand("copy");
        tempElem.remove();
        setTimeout(function(){ $('#shareAlert').fadeOut(); },2000);

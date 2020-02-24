@@ -3,6 +3,9 @@
 // START HELPER FUNCTIONS
 //
 //**
+
+var HINTAPIURL = "http://aaae98055559711eaa7410a53d2d7c0e-391595921.us-west-2.elb.amazonaws.com/hint-api-v0"
+
 var regexpat = /[^\d][(.|?|!)](?=\s|$)/mi // no global to enable, string.match to return index
 
 function removeByIndex(str,index) {
@@ -158,6 +161,38 @@ function showSidebar()
 
 }
 
+
+/**
+ * Gets category from user submission and sends to google forms
+**/
+function submitCatergory (categoryString) {
+
+  var docuid = DocumentApp.getActiveDocument().getId();
+  var EditorArray = DocumentApp.getActiveDocument().getEditors();
+
+  var date_today = new Date();
+  var today_year = date_today.getFullYear();
+  var today_month = ("0" + (date_today.getMonth() + 1)).slice(-2);
+  var today_day = ("0" + date_today.getDate()).slice(-2);
+  var datestring = today_year + '-' + today_month + '-' + today_day;
+
+  if (EditorArray[0].getEmail().indexOf("hintwriting.com") === -1) // https://stackoverflow.com/a/47486826/3700836
+  {
+    var formData = {
+      'entry.136409957' : categoryString,
+      'entry.419624731' : EditorArray[i].getEmail(), //email
+      'entry.352867374' : docuid, // docuid
+      'entry.501922370' : datestring
+    };
+    var options = {
+      'method' : 'post',
+      'payload' : formData
+    };
+
+    UrlFetchApp.fetch('https://docs.google.com/forms/d/e/1FAIpQLSck_5piXaBnnwymRtJciOlKGelzGecS_h_tyZnu5hFWpTra9Q/formResponse', options);
+  }
+}
+
 /**
  * Gets the text the user has selected. If there is no selection,
  * this function displays an error message.
@@ -295,10 +330,12 @@ function getTextandGiveHint()
   Logger.log( 'prompt length: ' + prompt.length );
 
   var suggestedText = "";
+  var nohint = false;
 
   if ( prompt.length < 180 )
   {
     suggestedText = "I'll be able to help you with a hint after you write a little more! Keep going and ask for a hint again once you are ready for inspiration.";
+    nohint = true;
   }
   else
   {
@@ -306,7 +343,7 @@ function getTextandGiveHint()
   }
   Logger.log( 'getTextandGiveHint text is' + suggestedText );
   Logger.log('exiting getTextandGiveHint');
-  return { suggestion: suggestedText };
+  return { suggestion: suggestedText, nohint: nohint };
 }
 
 /**
@@ -497,7 +534,6 @@ function insertText( newText )
 function retrieveSuggestedTextFromAPI(prompt)
 {
   Logger.log('entering retrieveSuggestedTextFromAPI');
-  var url = 'http://ae7dafded316511eab1fb0eb612f22d6-278490164.us-west-2.elb.amazonaws.com/hint/api-v0';
 
   var data =
   {
@@ -512,7 +548,7 @@ function retrieveSuggestedTextFromAPI(prompt)
     'payload' : JSON.stringify(data)
   };
 
-  var responseText = JSON.parse(UrlFetchApp.fetch(url, options).getContentText("UTF-8"));
+  var responseText = JSON.parse(UrlFetchApp.fetch(HINTAPIURL, options).getContentText("UTF-8"));
 
   Logger.log('retrieveSuggestedTextFromAPI response is ' + responseText);
 
