@@ -326,12 +326,13 @@
         if ( $(event.target).hasClass('re-hint') )
         {
           gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': currentHint});
+        } else {
+          gtag( 'event' , 'hint', { 'event_category' : 'engagement', method : 'hint-sidebar' });
         }
         $('#output').hide();
         hideButtons();
         hideError();
         lottie.play();
-        gtag( 'event' , 'query', { 'event_category' : 'engagement', method : 'hint-sidebar' });
         typeWriter("output", [], true);
         console.log('entering hintText');
         this.disabled = true;
@@ -421,7 +422,7 @@
       function rejectText(nohint) {
         hideButtons();
         hideError();
-        if(!nohint){ gtag('event', 'reject', { 'event_category' : 'engagement', method : 'hint-sidebar'}); }
+        if(typeof nohint === 'undefined'){ gtag('event', 'reject', { 'event_category' : 'engagement', method : 'hint-sidebar'}); }
         console.log('entering rejectText');
         //var originalText = $('input[name=origin]').val();
         this.disabled = true;
