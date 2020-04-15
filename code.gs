@@ -1,10 +1,14 @@
 //**
-//
+// 
 // START HELPER FUNCTIONS
 //
 //**
 
 var HINTAPIURL = "http://aaae98055559711eaa7410a53d2d7c0e-391595921.us-west-2.elb.amazonaws.com/hint-api-v0"
+var HINTDBAPIURL = "https://webhooks.mongodb-stitch.com/api/client/v2.0/app/api-gdocs-spypg/service/data/incoming_webhook/add-data"
+var HINTDBSECRET = "2CZkDA3C5cFSMGxCMTu8zXsgr88P3R"
+var CURRENTCATEGORY = "unset"
+var MOSTRECENTHINTID = ""
 
 var regexpat = /[^\d][(.|?|!)](?=\s|$)/mi // no global to enable, string.match to return index
 
@@ -31,7 +35,7 @@ function regexpatIndex(str){
     var match;
     var strcpy = str
     while ( strcpy.match( regexpat ) !== null ){
-      Logger.log( "i : " + i )
+      // Logger.log( "i : " + i )
       match = strcpy.match( regexpat );
       match[ "index" ] = match[ "index" ] + 2;
       strcpy = removeByIndex( strcpy , match[ "index" ] );
@@ -78,9 +82,7 @@ function onOpen(e)
 
   Logger.log( 'entering onOpen' );
 
-  DocumentApp.getUi().createAddonMenu()
-      .addItem( 'Start', 'showSidebar' )
-      .addToUi();
+  DocumentApp.getUi().createAddonMenu().addItem( 'Start', 'showSidebar' ).addToUi();
 
   Logger.log( 'exiting onOpen' );
 
@@ -129,8 +131,11 @@ function showSidebar()
   var today_day = ("0" + date_today.getDate()).slice(-2);
   var datestring = today_year + '-' + today_month + '-' + today_day;
 
+  var editorList = [];
+
   for ( var i = 0; i < EditorArray.length; i++ )
   {
+    editorList.push(EditorArray[i].getEmail())
     // Iterate over numeric indexes from 0 to length, as everyone expects.
 
     if (EditorArray[i].getEmail().indexOf("hintwriting.com") === -1) // https://stackoverflow.com/a/47486826/3700836
@@ -150,12 +155,33 @@ function showSidebar()
     }
   }
 
+  var options = {
+    'method' : 'post'
+  }
+  var params =
+      {
+        "secret" : HINTDBSECRET,
+        "task" : "document",
+        "gdocsid" : docuid,
+        "user" : Session.getActiveUser().getEmail(),
+        "editors" : editorList.join(","),
+        "fulltext" : "[notavailable]"
+      }
+
+  // Updated db in play
+  var queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+  }).join('&');
+
+  UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options);
+
+
+
   var ui = HtmlService.createHtmlOutputFromFile( 'sidebar' )
       .setTitle( 'hint' );
 
-
-
   DocumentApp.getUi().showSidebar( ui );
+
 
   Logger.log( 'exiting showSidebar' );
 
@@ -191,6 +217,26 @@ function submitCatergory (categoryString) {
 
     UrlFetchApp.fetch('https://docs.google.com/forms/d/e/1FAIpQLSck_5piXaBnnwymRtJciOlKGelzGecS_h_tyZnu5hFWpTra9Q/formResponse', options);
   }
+
+  var options = {
+    'method' : 'post'
+  }
+  var params =
+      {
+        "secret" : HINTDBSECRET,
+        "task" : "category",
+        "gdocsid" : docuid,
+        "category": categoryString,
+        "user" : Session.getActiveUser().getEmail()
+      }
+
+  // Updated db in play
+  var queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+  }).join('&');
+
+  UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options);
+
 }
 
 /**
@@ -341,8 +387,44 @@ function getTextandGiveHint()
   {
     suggestedText = retrieveSuggestedTextFromAPI( prompt );
   }
-  Logger.log( 'getTextandGiveHint text is' + suggestedText );
+
+  var docuid = DocumentApp.getActiveDocument().getId();
+
+  var data  =
+      {
+        
+        "gdocsid" : docuid,
+        "hinttext": suggestedText,
+        "submittedtext" : prompt,
+        "category" : CURRENTCATEGORY,
+        "user" : Session.getActiveUser().getEmail()
+      }
+  
+  var params = {
+    "secret" : HINTDBSECRET,
+     "task" : "hint",
+  }
+  
+  var options =
+  {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify(data)
+  };
+
+ 
+  // Updated db in play
+  var queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+  }).join('&');
+
+  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are just returning the id
+  
+  // Logger.log( 'getTextandGiveHint text is' + suggestedText );
+  // Logger.log( 'hint id is ' + response);
   Logger.log('exiting getTextandGiveHint');
+
   return { suggestion: suggestedText, nohint: nohint };
 }
 
