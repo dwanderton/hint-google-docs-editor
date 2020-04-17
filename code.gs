@@ -124,6 +124,8 @@ function showSidebar()
 
   var EditorArray = DocumentApp.getActiveDocument().getEditors();
   var docuid = DocumentApp.getActiveDocument().getId();
+  var doctitle = DocumentApp.getActiveDocument().getName();
+  var doctext = DocumentApp.getActiveDocument().getBody().getText();
 
   var date_today = new Date();
   var today_year = date_today.getFullYear();
@@ -155,30 +157,37 @@ function showSidebar()
     }
   }
 
-  var options = {
-    'method' : 'post'
+
+  var params = {
+    "secret" : HINTDBSECRET,
+    "task" : "document",
+    }
+
+  var data =
+  {
+    "gdocsid" : docuid,
+    "user" : Session.getActiveUser().getEmail(),
+    "editors" : editorList.join(","),
+    "fulltext" : doctext
   }
-  var params =
-      {
-        "secret" : HINTDBSECRET,
-        "task" : "document",
-        "gdocsid" : docuid,
-        "user" : Session.getActiveUser().getEmail(),
-        "editors" : editorList.join(","),
-        "fulltext" : "[notavailable]"
-      }
+
+  var options = {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify(data)
+  }
 
   // Updated db in play
   var queryString = Object.keys(params).map((key) => {
       return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
   }).join('&');
 
-  UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options);
-
+  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are not expecting json, or anything right now
 
 
   var ui = HtmlService.createHtmlOutputFromFile( 'sidebar' )
-      .setTitle( 'hint' );
+      .setTitle( ' ' ); // previously `hint` but logo already appears
 
   DocumentApp.getUi().showSidebar( ui );
 
@@ -412,7 +421,6 @@ function getTextandGiveHint()
     // Convert the JavaScript object to a JSON string.
     'payload' : JSON.stringify(data)
   };
-
  
   // Updated db in play
   var queryString = Object.keys(params).map((key) => {
