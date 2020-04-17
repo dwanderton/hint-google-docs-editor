@@ -248,6 +248,52 @@ function submitCatergory (categoryString) {
 
 }
 
+
+/**
+ * Adds the rejected hint to the db
+ * 
+ * 
+ */
+
+ function rejectHint (hintid)
+ {
+   Logger.log('entering reject hint with id: ' + hintid)
+
+  var docuid = DocumentApp.getActiveDocument().getId();
+
+  var data  =
+      {
+        
+        "gdocsid" : docuid,
+        "hintid" : hintid,
+        "category" : CURRENTCATEGORY,
+        "user" : Session.getActiveUser().getEmail()
+
+      }
+  
+  var params = {
+    "secret" : HINTDBSECRET,
+     "task" : "reject",
+  }
+  
+  var options =
+  {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify(data)
+  };
+ 
+  // Updated db in play
+  var queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+  }).join('&');
+
+  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are just returning the id
+  Logger.log('finsihed reject hint')
+
+ }
+
 /**
  * Gets the text the user has selected. If there is no selection,
  * this function displays an error message.
@@ -433,7 +479,7 @@ function getTextandGiveHint()
   // Logger.log( 'hint id is ' + response);
   Logger.log('exiting getTextandGiveHint');
 
-  return { suggestion: suggestedText, nohint: nohint };
+  return { suggestion: suggestedText , nohint: nohint , hintid : response };
 }
 
 /**

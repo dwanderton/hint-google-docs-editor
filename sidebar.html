@@ -299,7 +299,7 @@
       /**
       *  Runs a server-side function to set user category
       */
-      function catqReport (event){
+      function catqReport ( event ){
         $( '.btn-category' ).attr( "disabled" , true )
         reportCategory = $( event.target ).data( 'value' );
         $( '#category-questions' ).hide( 'fast' );
@@ -345,11 +345,11 @@
                 currentHint = response.suggestion;
                 if(response.nohint)
                 {
-                  $('#output').html("<p>" + response.suggestion + "</p>").show(500);
-                  $('#loading' ).hide( 'fast' , function()
+                  $( '#output' ).html( "<p>" + response.suggestion + "</p>" ).show( 500 );
+                  $( '#loading' ).hide( 'fast' , function()
                   {
                     lottie.pause();
-                    setTimeout(function(){ rejectText(true); }, 5000);
+                    setTimeout( function(){ rejectText( {}, true ); }, 5000 );
 
                   });
 
@@ -358,25 +358,26 @@
                 }
                 else
                 {
-                  $('#loading').animate({ width: '-=80%', height: '-=80%' }, 500, function(){
-                    $('#output').show(0).attr("contenteditable", "true");
-                    typeWriter("output", [response.suggestion]);
+                  $( '#output' ).data( 'hid' , response.hintid );
+                  $( '#loading' ).animate({ width: '-=80%', height: '-=80%' }, 500, function(){
+                    $( '#output' ).show(0).attr( "contenteditable" , "true" );
+                    typeWriter( "output" , [ response.suggestion ] );
                   });
 
                   element.disabled = false;
                 }
               })
             .withFailureHandler(
-              function(msg, element) {
-                logError(msg, true);
+              function( msg, element ) {
+                logError( msg, true );
                 lottie.pause();
                 element.disabled = false;
                 displayError();
-                $('#button-bar-0').slideDown(600);
+                $( '#button-bar-0' ).slideDown(600);
               })
-             .withUserObject(this)
+             .withUserObject( this )
              .getTextandGiveHint();
-        console.log('exiting hintText');
+        console.log( 'exiting hintText' );
       }
 
       /**
@@ -391,44 +392,76 @@
         //var originalText = $('input[name=origin]').val();
         this.disabled = true;
         typeWriter("output", [], true);
-          google.script.run
-            .withSuccessHandler(
-              function(returnSuccess, element) {
-                element.disabled = false;
-                //$('#textSuggestion').val(returnSuccess.suggestion);
-                //$('input[name=originalText]').val(returnSuccess.suggestion);
+        google.script.run
+          .withSuccessHandler(
+            function(returnSuccess, element) {
+              element.disabled = false;
+              //$('#textSuggestion').val(returnSuccess.suggestion);
+              //$('input[name=originalText]').val(returnSuccess.suggestion);
 
-                // factor out into function
-                $('#loading').show("fast");
-                $('#button-bar-0').slideDown(600);
-              })
-            .withFailureHandler(
-              function(msg, element) {
-                logError(msg, true);
-                displayError();
-                element.disabled = false;
+              // factor out into function
+              $('#loading').show("fast");
+              $('#button-bar-0').slideDown(600);
+            })
+          .withFailureHandler(
+            function(msg, element) {
+              logError(msg, true);
+              displayError();
+              element.disabled = false;
 
-                // factor out into function
-                $('#loading').show("fast");
-                $('#button-bar-0').slideDown(600);
-              })
-            .withUserObject(this)
-            .insertText($('#output').text())
-            .getTextandGiveHint();
+              // factor out into function
+              $('#loading').show("fast");
+              $('#button-bar-0').slideDown(600);
+            })
+          .withUserObject(this)
+          .insertText($('#output').text())
+          .getTextandGiveHint();
 
-            console.log('exiting insertText');
+          console.log('exiting insertText');
       }
 
-      function rejectText(nohint) {
+      function rejectText(event, nohint) {
         hideButtons();
         hideError();
-        if(typeof nohint === 'undefined'){ gtag('event', 'reject', { 'event_category' : 'engagement', method : 'hint-sidebar'}); }
         console.log('entering rejectText');
-        //var originalText = $('input[name=origin]').val();
-        this.disabled = true;
-        typeWriter("output", [], true);
-        $('#loading').show("fast");
-        $('#button-bar-0').slideDown(600);
+        if( typeof nohint === 'undefined' )
+        { 
+          gtag('event', 'reject', { 'event_category' : 'engagement' , method : 'hint-sidebar' }); 
+          hintid = $( '#output' ).data( 'hid' );
+          google.script.run
+          .withSuccessHandler(
+            function(returnSuccess, element) {
+              
+              this.disabled = true;
+              typeWriter( "output" , [], true );
+              $( '#loading' ).show( "fast" );
+              $( '#button-bar-0' ).slideDown( 600 );
+
+            })
+          .withFailureHandler(
+            function(msg, element) {
+
+              logError(msg, false);
+              this.disabled = true;
+              typeWriter( "output" , [], true );
+              $( '#loading' ).show( "fast" );
+              $( '#button-bar-0' ).slideDown( 600 );
+
+            })
+          .withUserObject( this )
+          .rejectHint( hintid );
+
+        } 
+        else
+        {
+
+          this.disabled = true;
+          typeWriter("output", [], true);
+          $('#loading').show("fast");
+          $('#button-bar-0').slideDown(600);
+          
+
+        }
         console.log('exiting rejectText');
       }
 
