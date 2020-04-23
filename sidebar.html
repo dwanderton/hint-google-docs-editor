@@ -407,7 +407,7 @@
       function hintText ( event ) {
         if ( $(event.target).hasClass('re-hint') )
         {
-          gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': currentHint});
+          gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': 're-hint' });
         } else {
           gtag( 'event' , 'hint', { 'event_category' : 'engagement', method : 'hint-sidebar' });
         }
