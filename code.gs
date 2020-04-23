@@ -250,6 +250,20 @@ function submitCatergory (categoryString) {
 
 
 /**
+ * 
+ * Get the user email
+ * 
+ */
+
+function getUserEmail ()
+{
+
+  return { 'email' : Session.getActiveUser().getEmail() }
+
+}
+
+
+/**
  * Adds the rejected hint to the db
  * 
  * 
@@ -435,7 +449,7 @@ function getTextandGiveHint()
 
   if ( prompt.length < 180 )
   {
-    suggestedText = "I'll be able to help you with a hint after you write a little more! Keep going and ask for a hint again once you are ready for inspiration.";
+    suggestedText = "I'll be able to help you with a hint after you write a little more ( about 80 words )! Keep going and ask for a hint again once you are ready for inspiration.";
     nohint = true;
   }
   else

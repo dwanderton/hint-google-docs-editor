@@ -103,14 +103,32 @@
     <div id="shareAlert" class="alert alert-success" role="alert" style="position:absolute;display:none;">
       share link is in your clipboard!
     </div>
-    <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
-      <img src="https://hintwriting.com/assets/img/brand.png" class="navbar-brand-img" alt="hint logo">
-    </a>
 
-    <i class="fas fa-share-alt share-hint text-primary" style="position: absolute; right: 20px; top: 30px; font-size: 1.2em; cursor:pointer;"></i>
-    <br/><br/>
+    <span id="nav-top" style="display: none;">
+      <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
+        <img id="hintlogo" src="https://hintwriting.com/assets/img/brand.png" class="navbar-brand-img" alt="hint logo" >
+      </a>
+
+      <i id="sharehint" class="fas fa-share-alt share-hint text-primary" style="position: absolute; right: 20px; top: 30px; font-size: 1.2em; cursor:pointer;"></i>
+      <br/><br/><br/>
+    </span>
+    
+
     <form>
-      <div id="category-questions">
+      <div id="upgradepanel">
+        <img style="max-width: 100%;" src="https://hintwriting.com/assets/img/addon/upgrade.png">
+        <br/>
+        <p class="text-center upgrade"><a id="upgrade-link" href="https://hintwriting.com/upgrade" target="_blank" class="btn btn-outline-primary">Upgrade to Hint Plus</a></p>
+        <p class="btn btn-link text-muted donotupgrade" style="padding-top: 0px;"><a>continue to hint free version</a></p>
+      </div>
+
+      <div id="postupgradepanel"  style="display:none;">
+        <p class="lead">Awesome!</p>
+        <p>If you have upgraded to <strong>hint plus</strong> its benefits will be activated automatically when you <strong>reload the hint addon</strong>. You can also 
+        <span class="text-muted donotupgrade" style="cursor:pointer"><a>continue to the free version of hint</span>.</p>
+      </div>
+
+      <div id="category-questions" style="display:none;">
         <p class="lead">What type of writing will you be doing today?</p>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="marketing">marketing</button>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="business">business writing</button>
@@ -166,6 +184,36 @@
   </div>
 
   <!-- end of page -->
+
+  <script>
+    /**
+     * 
+     *  Obtain user email for upgrade parameter ASAP
+     * 
+    **/
+
+    google.script.run.withSuccessHandler(
+      function( response , element )
+      {
+        
+        userEmail = response.email;
+        
+        currentLink = $( '#upgrade-link' ).attr("href")
+        $( '#upgrade-link' ).attr( "href" , currentLink + '?email=' + userEmail );
+        // show everything initially - not worth decline in user experience
+        // $( '#upgrade-link' ).show();
+        // $( '.donotupgrade a' ).show();
+        
+
+
+      }).withFailureHandler(
+      function( msg, element ) {
+        logError( msg, true );
+        $( '#upgrade-links-span' ).show();
+      })
+      .getUserEmail();
+
+  </script>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://kit.fontawesome.com/c5ae9bac41.js" crossorigin="anonymous"></script>
@@ -287,19 +335,53 @@
 
 
       $(function() {
-        $('.btn-category').click(catqReport)
+        $('.upgrade').click(upgrade);
+        $('.donotupgrade').click(donotupgrade);
+        $('.btn-category').click(catqReport);
         $('.run-hint').click(hintText);
         $('.flag-hint').click(flaghint);
         $('#insert-text').click(insertText);
         $('#reject-text').click(rejectText);
         $('.share-hint').click(copyShareHint);
         var currentHint = "";
+
       });
+
+
+      /**
+       *
+       * While a new tab is opened, function prepares addon for user return
+       *
+      **/ 
+      
+      function upgrade ( event ) 
+      {
+        $('#upgradepanel').hide();
+        $('#nav-top').show();
+        $('#postupgradepanel').show();
+        gtag( 'event' , 'upgrade', { 'event_category' : 'engagement', method : 'hintplus-intro' });
+      }
+
+      /**
+       * 
+       *  Skip upgrade tab and proceed to hint free
+       * 
+      **/
+      
+      function donotupgrade ( event )
+      {
+        $('#upgradepanel').hide();
+        $('#postupgradepanel').hide();
+        $('#nav-top').show();
+        $('#category-questions').show();
+        gtag( 'event' , 'donotupgrade', { 'event_category' : 'engagement', method : 'hintplus-intro' });
+      }
 
       /**
       *  Runs a server-side function to set user category
       */
-      function catqReport ( event ){
+      function catqReport ( event )
+      {
         $( '.btn-category' ).attr( "disabled" , true )
         reportCategory = $( event.target ).data( 'value' );
         $( '#category-questions' ).hide( 'fast' );
