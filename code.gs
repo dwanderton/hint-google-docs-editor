@@ -425,13 +425,13 @@ function getTextandGiveHint()
 
   if( prompt.length < 180 )
   {
-    Logger.log("prompt too short");
+    // Logger.log("prompt too short");
     var bodyText = DocumentApp.getActiveDocument().getBody().getText();
 
     Logger.log(bodyText.length)
     if( bodyText.length > 1000 )
     {
-      Logger.log("adjust length of prompt")
+      // Logger.log("adjust length of prompt")
       prompt = bodyText.slice( bodyText.length - 1000 );
     }
     else
@@ -455,40 +455,40 @@ function getTextandGiveHint()
   else
   {
     suggestedText = retrieveSuggestedTextFromAPI( prompt );
+    
+
+    var docuid = DocumentApp.getActiveDocument().getId();
+
+    var data  =
+        {
+          
+          "gdocsid" : docuid,
+          "hinttext": suggestedText,
+          "submittedtext" : prompt,
+          "category" : CURRENTCATEGORY,
+          "user" : Session.getActiveUser().getEmail()
+        }
+    
+    var params = {
+      "secret" : HINTDBSECRET,
+      "task" : "hint",
+    }
+    
+    var options =
+    {
+      'method' : 'post',
+      'contentType': 'application/json',
+      // Convert the JavaScript object to a JSON string.
+      'payload' : JSON.stringify(data)
+    };
+  
+    // Updated db in play
+    var queryString = Object.keys(params).map((key) => {
+        return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+    }).join('&');
+
+    var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are just returning the id
   }
-
-  var docuid = DocumentApp.getActiveDocument().getId();
-
-  var data  =
-      {
-        
-        "gdocsid" : docuid,
-        "hinttext": suggestedText,
-        "submittedtext" : prompt,
-        "category" : CURRENTCATEGORY,
-        "user" : Session.getActiveUser().getEmail()
-      }
-  
-  var params = {
-    "secret" : HINTDBSECRET,
-     "task" : "hint",
-  }
-  
-  var options =
-  {
-    'method' : 'post',
-    'contentType': 'application/json',
-    // Convert the JavaScript object to a JSON string.
-    'payload' : JSON.stringify(data)
-  };
- 
-  // Updated db in play
-  var queryString = Object.keys(params).map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
-  }).join('&');
-
-  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are just returning the id
-  
   // Logger.log( 'getTextandGiveHint text is' + suggestedText );
   // Logger.log( 'hint id is ' + response);
   Logger.log('exiting getTextandGiveHint');
