@@ -269,9 +269,9 @@ function getUserEmail ()
  * 
  */
 
- function rejectHint (hintid)
+ function rejectHint ( hintid )
  {
-   Logger.log('entering reject hint with id: ' + hintid)
+   //Logger.log( 'entering reject hint with id: ' + hintid )
 
   var docuid = DocumentApp.getActiveDocument().getId();
 
@@ -295,18 +295,108 @@ function getUserEmail ()
     'method' : 'post',
     'contentType': 'application/json',
     // Convert the JavaScript object to a JSON string.
-    'payload' : JSON.stringify(data)
+    'payload' : JSON.stringify( data )
   };
  
   // Updated db in play
-  var queryString = Object.keys(params).map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
-  }).join('&');
+  var queryString = Object.keys( params ).map(( key ) => {
+      return encodeURIComponent( key ) + '=' + encodeURIComponent( params[ key ] )
+  }).join( '&' );
 
-  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are just returning the id
-  Logger.log('finsihed reject hint')
-
+  var response = UrlFetchApp.fetch( HINTDBAPIURL + "?" + queryString , options ).getContentText( "UTF-8" ); // no need for JSON.parse() as we are just returning the id
+  // Logger.log( 'finsihed reject hint' )
+  
+  return;
  }
+
+
+/**
+ * Flags a hint in the DB for a variety of reasons 
+ * ~~ expects a hintid and a reason ~~
+ * 
+ */
+function flagHint ( hintid, reason )
+{
+  var docuid = DocumentApp.getActiveDocument().getId();
+
+  var data  =
+      {
+        
+        "gdocsid" : docuid,
+        "hintid" : hintid,
+        "reason" : reason,
+        "category" : CURRENTCATEGORY,
+        "user" : Session.getActiveUser().getEmail()
+
+      }
+  
+  var params = {
+    "secret" : HINTDBSECRET,
+     "task" : "flag",
+  }
+
+  var options =
+  {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify( data )
+  };
+ 
+  // Updated db in play
+  var queryString = Object.keys( params ).map(( key ) => {
+      return encodeURIComponent( key ) + '=' + encodeURIComponent( params[ key ] )
+  }).join( '&' );
+
+  var response = UrlFetchApp.fetch( HINTDBAPIURL + "?" + queryString , options ).getContentText( "UTF-8" ); // no need for JSON.parse() as we are just returning the id
+
+  return;
+}
+
+
+/**
+ * Adds a rehint in the DB for a variety of reasons 
+ * ~~ expects a hintid and a reason ~~
+ * 
+ */
+function reHint ( hintid )
+{
+  var docuid = DocumentApp.getActiveDocument().getId();
+
+  var data  =
+      {
+        
+        "gdocsid" : docuid,
+        "hintid" : hintid,
+        "category" : CURRENTCATEGORY,
+        "user" : Session.getActiveUser().getEmail()
+
+      }
+  
+  var params = {
+    "secret" : HINTDBSECRET,
+     "task" : "rehint",
+  }
+
+  var options =
+  {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify( data )
+  };
+ 
+  // Updated db in play
+  var queryString = Object.keys( params ).map(( key ) => {
+      return encodeURIComponent( key ) + '=' + encodeURIComponent( params[ key ] )
+  }).join( '&' );
+
+  var response = UrlFetchApp.fetch( HINTDBAPIURL + "?" + queryString , options ).getContentText( "UTF-8" ); // no need for JSON.parse() as we are just returning the id
+
+  return;
+}
+
+
 
 /**
  * Gets the text the user has selected. If there is no selection,
@@ -316,7 +406,7 @@ function getUserEmail ()
  */
 function getSelectedText()
 {
-  Logger.log( 'entering getSelectedText' );
+  // Logger.log( 'entering getSelectedText' );
 
   var selection = DocumentApp.getActiveDocument().getSelection();
   var text = [];
@@ -365,8 +455,8 @@ function getSelectedText()
 
   if ( !text.length ) throw new Error( 'Please select some text.' );
 
-  Logger.log('getSelectText return value is' + text);
-  Logger.log('exiting getSelectedText');
+  // Logger.log('getSelectText return value is' + text);
+  // Logger.log('exiting getSelectedText');
 
   return text;
 
@@ -504,8 +594,10 @@ function getTextandGiveHint()
  * other elements.
  *
  * @param {string} newText The text with which to replace the current selection.
+ * @param {string} hintid id of the originating hint that the text is from.
+ * 
  */
-function insertText( newText )
+function insertText( newText , hintid)
 {
 
   Logger.log( 'entering newText' );
@@ -622,10 +714,10 @@ function insertText( newText )
 
     var cursor = DocumentApp.getActiveDocument().getCursor();
     var surroundingText = cursor.getSurroundingText().getText();
-    Logger.log("surroundingText is: " + surroundingText);
+    // Logger.log("surroundingText is: " + surroundingText);
 
     var surroundingTextOffset = cursor.getSurroundingTextOffset();
-    Logger.log("surroundingTextOffset is: " + surroundingTextOffset);
+    // Logger.log("surroundingTextOffset is: " + surroundingTextOffset);
 
     // If the cursor follows or preceds a non-space character, insert a space
     // between the character and the hint. Otherwise, just insert the
@@ -654,11 +746,43 @@ function insertText( newText )
     }
     cursor.insertText( newText );
 
-    Logger.log( 'newText newText is' + newText );
+    // Logger.log( 'newText newText is' + newText );
 
   }
 
-  Logger.log( 'exiting newText' );
+  var docuid = DocumentApp.getActiveDocument().getId();
+
+  var data  =
+  {
+    "gdocsid" : docuid,
+    "inserttext": newText,
+    "hintid" : hintid,
+    "category" : CURRENTCATEGORY,
+    "user" : Session.getActiveUser().getEmail()
+  }
+  
+  var params = 
+  {
+    "secret" : HINTDBSECRET,
+    "task" : "insert",
+  }
+  
+  var options =
+  {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify(data)
+  };
+
+  // Updated db in play
+  var queryString = Object.keys(params).map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+  }).join('&');
+
+  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are just returning the id
+
+  // Logger.log( 'exiting newText' );
 
 }
 

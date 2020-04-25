@@ -48,7 +48,8 @@
     .pointer {
       cursor: pointer;
     }
-    .flag-hint:hover {
+
+    .flag-hint:hover, .flag-hint-trigger:hover, .flag-hint-trigger .active {
       color: #df4759!important;
     }
 
@@ -157,18 +158,24 @@
         <button class="btn btn-success shadow lift mr-1" id="insert-text">
           insert
         </button>
-        <button class="btn btn-outline-primary shadow lift mr-1 run-hint re-hint">
+        <button class="btn btn-outline-primary shadow lift mr-1 re-hint">
           <i class="fas fa-redo"></i> re-hint
         </button>
         <br><br>
         <button class="btn btn-outline-danger shadow lift mr-1" id="reject-text">
           <i class="fas fa-times"></i> reject
         </button>
-        <!-- <p class="text-muted p-3">
-          <a class="flag-hint pointer"><i class="far fa-flag"></i> flag this hint</a>
-          <!-- typos and grammar; incomplete; offensive/inappropriate - severe; offensive/inappropriate - mild; inaccurate -->
-          <!--
-        </p> -->
+         <p class="text-muted p-3">
+          <a class="flag-hint-trigger pointer"><i class="far fa-flag"></i> flag this hint</a>
+          <ul id="flag-hint-options" style="display: none;">
+            <li class="text-muted flag-hint pointer" data-reason="typos">typos and grammar</li>
+            <li class="text-muted flag-hint pointer" data-reason="incomplete">incomplete</li>
+            <li class="text-muted flag-hint pointer" data-reason="inaccurate">inaccurate</li>
+            <li class="text-muted flag-hint pointer" data-reason="nonsense">nonsense</li>
+            <li class="text-muted flag-hint pointer" data-reason="offensive severe">offensive - severe</li>
+            <li class="text-muted flag-hint pointer" data-reason="offensive mild">offensive - mild</li>
+          </ul>
+        </p>
       </div>
       <br/><br/>
       <div id="error-bay">
@@ -296,7 +303,7 @@
           lottie.pause();
           $('#loading' ).hide( 'fast' , function()
           {
-            $( '#button-bar-1' ).slideDown( 600 , function(){$( '#output-paragraph' ).focus();});
+            $( '#button-bar-1' ).slideDown( 600 , function(){ $( '#output-paragraph' ).focus(); });
             $( '#loading' ).animate({ width: '+=80%' , height: '+=80%' }, 0 );
           });
 
@@ -335,14 +342,16 @@
 
 
       $(function() {
-        $('.upgrade').click(upgrade);
-        $('.donotupgrade').click(donotupgrade);
-        $('.btn-category').click(catqReport);
-        $('.run-hint').click(hintText);
-        $('.flag-hint').click(flaghint);
-        $('#insert-text').click(insertText);
-        $('#reject-text').click(rejectText);
-        $('.share-hint').click(copyShareHint);
+        $( '.upgrade' ).click(upgrade);
+        $( '.donotupgrade' ).click(donotupgrade);
+        $( '.btn-category' ).click(catqReport);
+        $( '.run-hint' ).click(hintText);
+        $( '.re-hint' ).click(rehint);
+        $( '.flag-hint-trigger' ).click( function(){ $( '#flag-hint-options' ).show() } )
+        $( '.flag-hint' ).click(flaghint);
+        $( '#insert-text' ).click(insertText);
+        $( '#reject-text' ).click(rejectText);
+        $( '.share-hint' ).click(copyShareHint);
         var currentHint = "";
 
       });
@@ -356,9 +365,9 @@
       
       function upgrade ( event ) 
       {
-        $('#upgradepanel').hide();
-        $('#nav-top').show();
-        $('#postupgradepanel').show();
+        $( '#upgradepanel' ).hide();
+        $( '#nav-top ').show();
+        $( '#postupgradepanel' ).show();
         gtag( 'event' , 'upgrade', { 'event_category' : 'engagement', method : 'hintplus-intro' });
       }
 
@@ -370,10 +379,10 @@
       
       function donotupgrade ( event )
       {
-        $('#upgradepanel').hide();
-        $('#postupgradepanel').hide();
-        $('#nav-top').show();
-        $('#category-questions').show();
+        $( '#upgradepanel' ).hide();
+        $( '#postupgradepanel' ).hide();
+        $( '#nav-top' ).show();
+        $( '#category-questions' ).show();
         gtag( 'event' , 'donotupgrade', { 'event_category' : 'engagement', method : 'hintplus-intro' });
       }
 
@@ -405,10 +414,8 @@
        * the sidebar UI with the resulting text.
        */
       function hintText ( event ) {
-        if ( $(event.target).hasClass('re-hint') )
+        if ( !$(event.target).hasClass('re-hint') )
         {
-          gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': 're-hint' });
-        } else {
           gtag( 'event' , 'hint', { 'event_category' : 'engagement', method : 'hint-sidebar' });
         }
         $('#output').hide();
@@ -421,46 +428,77 @@
         $('#error').remove();
         var originalText = $('input[name=origin]').val();
         google.script.run
-            .withSuccessHandler(
-              function( response , element )
+        .withSuccessHandler(
+          function( response , element )
+          {
+            currentHint = response.suggestion;
+            if(response.nohint)
+            {
+              logError( "prompt text not enough", false );
+              $( '#output' ).html( "<p>" + response.suggestion + "</p>" ).show( 500 );
+              $( '#loading' ).hide( 'fast' , function()
               {
-                currentHint = response.suggestion;
-                if(response.nohint)
-                {
-                  logError( "prompt text not enough", false );
-                  $( '#output' ).html( "<p>" + response.suggestion + "</p>" ).show( 500 );
-                  $( '#loading' ).hide( 'fast' , function()
-                  {
-                    lottie.pause();
-                    setTimeout( function(){ rejectText( {}, true ); }, 5000 );
-
-                  });
-
-
-                  element.disabled = false;
-                }
-                else
-                {
-                  $( '#output' ).data( 'hid' , response.hintid );
-                  $( '#loading' ).animate({ width: '-=80%', height: '-=80%' }, 500, function(){
-                    $( '#output' ).show(0).attr( "contenteditable" , "true" );
-                    typeWriter( "output" , [ response.suggestion ] );
-                  });
-
-                  element.disabled = false;
-                }
-              })
-            .withFailureHandler(
-              function( msg, element ) {
-                logError( msg, true );
                 lottie.pause();
-                element.disabled = false;
-                displayError();
-                $( '#button-bar-0' ).slideDown(600);
-              })
-             .withUserObject( this )
-             .getTextandGiveHint();
+                setTimeout( function(){ rejectText( {}, true ); }, 5000 );
+
+              });
+
+
+              element.disabled = false;
+            }
+            else
+            {
+              $( '#output' ).data( 'hid' , response.hintid );
+              $( '#loading' ).animate({ width: '-=80%', height: '-=80%' }, 500, function(){
+                $( '#output' ).show(0).attr( "contenteditable" , "true" );
+                typeWriter( "output" , [ response.suggestion ] );
+              });
+
+              element.disabled = false;
+            }
+          })
+        .withFailureHandler(
+          function( msg, element ) {
+            logError( msg, true );
+            lottie.pause();
+            element.disabled = false;
+            displayError();
+            $( '#button-bar-0' ).slideDown(600);
+          })
+          .withUserObject( this )
+          .getTextandGiveHint();
         console.log( 'exiting hintText' );
+      }
+
+
+      function rehint ( event ) 
+      {
+        gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': 're-hint' });
+
+        $('#output').hide();
+        hideButtons();
+        hideError();
+        lottie.play();
+        typeWriter("output", [], true);
+        console.log('entering hintText');
+        this.disabled = true;
+        $('#error').remove();
+
+        hintid = $( '#output' ).data( 'hid' );
+        google.script.run
+        .withSuccessHandler(
+          function(returnSuccess, element) {
+            hintText( event )
+          })
+        .withFailureHandler(
+          function(msg, element) {
+            console.log('failure!')
+            logError(msg, false);
+            hintText( event )
+
+          })
+        .withUserObject( this )
+        .reHint( hintid );
       }
 
       /**
@@ -475,6 +513,8 @@
         //var originalText = $('input[name=origin]').val();
         this.disabled = true;
         typeWriter("output", [], true);
+        hintid = $( '#output' ).data( 'hid' );
+        
         google.script.run
           .withSuccessHandler(
             function(returnSuccess, element) {
@@ -496,9 +536,8 @@
               $('#loading').show("fast");
               $('#button-bar-0').slideDown(600);
             })
-          .withUserObject(this)
-          .insertText($('#output').text())
-          .getTextandGiveHint();
+          .withUserObject( this )
+          .insertText( $('#output').text() , hintid)
 
           console.log('exiting insertText');
       }
@@ -539,17 +578,48 @@
         {
 
           this.disabled = true;
-          typeWriter("output", [], true);
-          $('#loading').show("fast");
-          $('#button-bar-0').slideDown(600);
+          typeWriter( "output" , [] , true );
+          $( '#loading' ).show( "fast" );
+          $( '#button-bar-0' ).slideDown( 600 );
           
 
         }
-        console.log('exiting rejectText');
+        console.log( 'exiting rejectText' );
       }
 
-      function flaghint (issue=0) {
-        gtag('event', 'flag-hint', { 'event_category': 'engagement', 'event_label': currentHint, 'event_value': issue});
+      function flaghint (event, issue=0 ) {
+        hideButtons();
+        
+        reason = $( this ).data( "reason" )
+        console.log(reason);
+        gtag('event', 'flag-hint', { 'event_category': 'engagement', 'event_label': reason, 'event_value': issue});
+
+        hintid = $( '#output' ).data( 'hid' );
+          google.script.run
+          .withSuccessHandler(
+            function(returnSuccess, element) {
+              console.log('success')
+              this.disabled = true;
+              $( '#flag-hint-options' ).hide()
+              typeWriter( "output" , [], true );
+              $( '#loading' ).show( "fast" );
+              $( '#button-bar-0' ).slideDown( 600 );
+
+            })
+          .withFailureHandler(
+            function(msg, element) {
+              console.log('failure!')
+              logError(msg, false);
+              $( '#flag-hint-options' ).hide()
+              this.disabled = true;
+              typeWriter( "output" , [], true );
+              $( '#loading' ).show( "fast" );
+              $( '#button-bar-0' ).slideDown( 600 );
+
+            })
+          .withUserObject( this )
+          .flagHint( hintid , reason );
+
       }
 
 
@@ -569,6 +639,7 @@
       }
       function hideButtons(){
         $('form [id^="button-bar-"]').slideUp("fast");
+        $( '#flag-hint-options' ).slideUp("fast");
       }
 
       function copyShareHint() {
