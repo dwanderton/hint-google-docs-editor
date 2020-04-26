@@ -7,7 +7,6 @@
 var HINTAPIURL = "http://aaae98055559711eaa7410a53d2d7c0e-391595921.us-west-2.elb.amazonaws.com/hint-api-v0"
 var HINTDBAPIURL = "https://webhooks.mongodb-stitch.com/api/client/v2.0/app/api-gdocs-spypg/service/data/incoming_webhook/add-data"
 var HINTDBSECRET = "2CZkDA3C5cFSMGxCMTu8zXsgr88P3R"
-var CURRENTCATEGORY = "unset"
 var MOSTRECENTHINTID = ""
 
 var regexpat = /[^\d][(.|?|!)](?=\s|$)/mi // no global to enable, string.match to return index
@@ -280,7 +279,6 @@ function getUserEmail ()
         
         "gdocsid" : docuid,
         "hintid" : hintid,
-        "category" : CURRENTCATEGORY,
         "user" : Session.getActiveUser().getEmail()
 
       }
@@ -325,7 +323,6 @@ function flagHint ( hintid, reason )
         "gdocsid" : docuid,
         "hintid" : hintid,
         "reason" : reason,
-        "category" : CURRENTCATEGORY,
         "user" : Session.getActiveUser().getEmail()
 
       }
@@ -368,7 +365,6 @@ function reHint ( hintid )
         
         "gdocsid" : docuid,
         "hintid" : hintid,
-        "category" : CURRENTCATEGORY,
         "user" : Session.getActiveUser().getEmail()
 
       }
@@ -555,7 +551,6 @@ function getTextandGiveHint()
           "gdocsid" : docuid,
           "hinttext": suggestedText,
           "submittedtext" : prompt,
-          "category" : CURRENTCATEGORY,
           "user" : Session.getActiveUser().getEmail()
         }
     
@@ -757,7 +752,6 @@ function insertText( newText , hintid)
     "gdocsid" : docuid,
     "inserttext": newText,
     "hintid" : hintid,
-    "category" : CURRENTCATEGORY,
     "user" : Session.getActiveUser().getEmail()
   }
   
