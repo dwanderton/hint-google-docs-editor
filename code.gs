@@ -226,24 +226,37 @@ function submitCatergory (categoryString) {
     UrlFetchApp.fetch('https://docs.google.com/forms/d/e/1FAIpQLSck_5piXaBnnwymRtJciOlKGelzGecS_h_tyZnu5hFWpTra9Q/formResponse', options);
   }
 
-  var options = {
-    'method' : 'post'
-  }
-  var params =
-      {
-        "secret" : HINTDBSECRET,
-        "task" : "category",
-        "gdocsid" : docuid,
-        "category": categoryString,
-        "user" : Session.getActiveUser().getEmail()
-      }
+  var docuid = DocumentApp.getActiveDocument().getId();
 
+  var data  =
+  {
+    
+    "gdocsid" : docuid,
+    "category": categoryString,
+    "user" : Session.getActiveUser().getEmail()
+
+  };
+  
+  var params = 
+  {
+    "secret" : HINTDBSECRET,
+    "task" : "category",
+  };
+
+  var options =
+  {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify( data )
+  };
+ 
   // Updated db in play
-  var queryString = Object.keys(params).map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
-  }).join('&');
+  var queryString = Object.keys( params ).map(( key ) => {
+      return encodeURIComponent( key ) + '=' + encodeURIComponent( params[ key ] )
+  }).join( '&' );
 
-  UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options);
+  var response = UrlFetchApp.fetch( HINTDBAPIURL + "?" + queryString , options ).getContentText( "UTF-8" ); // no need for JSON.parse() as we are just returning the id
 
 }
 
