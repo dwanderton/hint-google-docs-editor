@@ -434,6 +434,7 @@
             currentHint = response.suggestion;
             if(response.nohint)
             {
+              gtag( 'event' , 'not-enough-text', { 'event_category' : 'engagement', method : 'hint-sidebar' });
               logError( "prompt text not enough", false );
               $( '#output' ).html( "<p>" + response.suggestion + "</p>" ).show( 500 );
               $( '#loading' ).hide( 'fast' , function()
