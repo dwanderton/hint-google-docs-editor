@@ -495,12 +495,14 @@
         .withSuccessHandler(
           function(returnSuccess, element) {
             hintText( event )
+            element.disabled = false;
           })
         .withFailureHandler(
           function(msg, element) {
             console.log('failure!')
             logError(msg, false);
             hintText( event )
+            element.disabled = false;
 
           })
         .withUserObject( this )
