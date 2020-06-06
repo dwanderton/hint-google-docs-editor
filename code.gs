@@ -506,9 +506,6 @@ function getSelectedText()
 function getTextandGiveHint()
 {
 
-  var suggestedText = "";
-  var nohint = false;
-
   Logger.log( 'entering getTextandGiveHint' );
 
 
@@ -525,7 +522,6 @@ function getTextandGiveHint()
 
   var prompt = surroundingText;
 
-  /*  START TO REMOVE 
   if( prompt.length < 180 )
   {
     // Logger.log("prompt too short");
@@ -542,20 +538,25 @@ function getTextandGiveHint()
       prompt = bodyText
     }
   }
- END TO REMOVE*/
+
 
   Logger.log( 'getTextandGiveHint prompt is' + prompt );
   Logger.log( 'prompt length: ' + prompt.length );
 
+  var suggestedText = "";
+  var nohint = false;
+
+  prompt = prompt.replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
 
   if ( prompt.length < 180 )
   {
-    suggestedText = "You can get a hint by placing the cursor at the end of a paragraph that has more than 180 characters ( about 70 words ) - you currently need " + (180 - prompt.length).toString() + " more characters.";
+    suggestedText = "I'll be able to help you with a hint after you write a little more ( about 80 words )! Keep going and ask for a hint again once you are ready for inspiration.";
     nohint = true;
   }
   else
   {
     suggestedText = retrieveSuggestedTextFromAPI( prompt );
+    suggestedText = suggestedText.replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
     
 
     var docuid = DocumentApp.getActiveDocument().getId();
@@ -859,3 +860,4 @@ function retrieveSuggestedTextFromAPI(prompt)
     return responseNoPrompt.substring( 0, cutIndexArray[1] );
   }
 }
+
