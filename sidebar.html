@@ -121,20 +121,8 @@
     
 
     <form>
-      <div id="upgradepanel">
-        <img style="max-width: 100%;" src="https://hintwriting.com/assets/img/addon/upgrade.png">
-        <br/>
-        <p class="text-center upgrade"><a id="upgrade-link" href="https://hintwriting.com/upgrade" target="_blank" class="btn btn-outline-primary">Upgrade to Hint Plus</a></p>
-        <p class="btn btn-link text-muted donotupgrade" style="padding-top: 0px;"><a>continue to hint free version</a></p>
-      </div>
 
-      <div id="postupgradepanel"  style="display:none;">
-        <p class="lead">Awesome!</p>
-        <p>If you have upgraded to <strong>hint plus</strong> its benefits will be activated automatically when you <strong>reload the hint addon</strong>. You can also 
-        <span class="text-muted donotupgrade" style="cursor:pointer"><a>continue to the free version of hint</span>.</p>
-      </div>
-
-      <div id="category-questions" style="display:none;">
+      <div id="category-questions">
         <p class="lead">What type of writing will you be doing today?</p>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="marketing">marketing</button>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="business">business writing</button>
@@ -144,6 +132,9 @@
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="journalism">journalism</button>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="other">other</button>
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="noidea">no idea</button>
+        <br/><br/>
+        <a class="upgrade-link" data-link="categoryimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
+        <p class="text-center upgrade"><a data-link="category" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
       </div>
 
       <div id="loading" class="block" style="display:none;">
@@ -158,6 +149,9 @@
         <button class="btn btn-primary shadow lift mr-1 run-hint">
           get a hint
         </button>
+        <br/><br/>
+        <a class="upgrade-link" data-link="gethintimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
+        <p class="text-center upgrade"><a data-link="gethint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
       </div>
       <div class="block text-center" id="button-bar-1" style="display:none;">
         <button class="btn btn-success shadow lift mr-1" id="insert-text">
@@ -181,6 +175,9 @@
             <li class="text-muted flag-hint pointer" data-reason="offensive mild">offensive - mild</li>
           </ul>
         </p>
+        <br/><br/>
+        <a class="upgrade-link" data-link="reviewhintimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
+        <p class="text-center upgrade"><a data-link="reviewhint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
       </div>
       <br/><br/>
       <div id="error-bay">
@@ -210,18 +207,12 @@
         
         userEmail = response.email;
         
-        currentLink = $( '#upgrade-link' ).attr("href")
-        $( '#upgrade-link' ).attr( "href" , currentLink + '?email=' + userEmail );
-        // show everything initially - not worth decline in user experience
-        // $( '#upgrade-link' ).show();
-        // $( '.donotupgrade a' ).show();
-        
-
+        currentLink = $( '.upgrade-link' ).attr("href")
+        $( '.upgrade-link' ).attr( "href" , currentLink + '?email=' + userEmail );
 
       }).withFailureHandler(
       function( msg, element ) {
         logError( msg, true );
-        $( '#upgrade-links-span' ).show();
       })
       .getUserEmail();
 
@@ -348,7 +339,6 @@
 
       $(function() {
         $( '.upgrade' ).click(upgrade);
-        $( '.donotupgrade' ).click(donotupgrade);
         $( '.btn-category' ).click(catqReport);
         $( '.run-hint' ).click(hintText);
         $( '.re-hint' ).click(rehint);
@@ -370,26 +360,12 @@
       
       function upgrade ( event ) 
       {
-        $( '#upgradepanel' ).hide();
-        $( '#nav-top ').show();
-        $( '#postupgradepanel' ).show();
-        gtag( 'event' , 'upgrade', { 'event_category' : 'engagement', method : 'hintplus-intro' });
+        // $( '#nav-top ').show();
+        // $( '#postupgradepanel' ).show();
+        source = $( event.target ).data( 'link' );
+        gtag( 'event' , 'upgrade', { 'event_category' : 'engagement', method : source });
       }
 
-      /**
-       * 
-       *  Skip upgrade tab and proceed to hint free
-       * 
-      **/
-      
-      function donotupgrade ( event )
-      {
-        $( '#upgradepanel' ).hide();
-        $( '#postupgradepanel' ).hide();
-        $( '#nav-top' ).show();
-        $( '#category-questions' ).show();
-        gtag( 'event' , 'donotupgrade', { 'event_category' : 'engagement', method : 'hintplus-intro' });
-      }
 
       /**
       *  Runs a server-side function to set user category
