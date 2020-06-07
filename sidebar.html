@@ -121,6 +121,8 @@
     
 
     <form>
+      <!-- %seenintro% : bool-->
+      
 
       <div id="category-questions">
         <p class="lead">What type of writing will you be doing today?</p>
@@ -134,12 +136,13 @@
         <button type="button" class="btn btn-light btn-lg btn-block btn-category" data-value="noidea">no idea</button>
         <br/><br/>
         <a class="upgrade-link" data-link="categoryimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
-        <p class="text-center upgrade"><a data-link="category" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
+        <p class="text-center upgrade"><a data-link="category" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-success">Upgrade to Hint Plus</a></p>
       </div>
 
       <div id="loading" class="block" style="display:none;">
         <div id="bm"></div>
       </div>
+      <div id="getstarted_block" class="alert" role="alert" style="display: none;">Put your cursor at end of paragraph, and click "get a hint" to get started.</div>
       <div class="form-group">
         <div class="output" id="output" style="display:none">
           <p class="cursor" id="output-paragraph" contenteditable></p>
@@ -153,13 +156,13 @@
         </button>
         <br/><br/>
         <a class="upgrade-link" data-link="gethintimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
-        <p class="text-center upgrade"><a data-link="gethint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
+        <p class="text-center upgrade"><a data-link="gethint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-success">Upgrade to Hint Plus</a></p>
       </div>
       <div class="block text-center" id="button-bar-1" style="display:none;">
         <button class="btn btn-success shadow lift mr-1" id="insert-text">
           insert
         </button>
-        <button class="btn btn-outline-primary shadow lift mr-1 re-hint">
+        <button class="btn btn-outline-success shadow lift mr-1 re-hint">
           <i class="fas fa-redo"></i> re-hint
         </button>
         <br><br>
@@ -181,7 +184,7 @@
         <div id="error-bay">
         </div>
         <a class="upgrade-link" data-link="reviewhintimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
-        <p class="text-center upgrade"><a data-link="reviewhint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
+        <p class="text-center upgrade"><a data-link="reviewhint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-success">Upgrade to Hint Plus</a></p>
       </div>
       <br/><br/>
       
@@ -382,12 +385,19 @@
             .withSuccessHandler(
             function( response , element )
             {
-                $( '#loading' ).slideDown( 600 , function() { $( '#button-bar-0' ).slideDown( 300 ); });
+                $( '#loading' ).slideDown( 600 , function() { 
+                  $( '#button-bar-0' ).slideDown( 300 ); 
+                  $( '#getstarted_block' ).slideDown( 300 );
+                });
             })
             .withFailureHandler(
               function( msg , element ) {
                 logError( msg, true );
-                $( '#loading' ).slideDown( 600 , function() { $( '#button-bar-0' ).slideDown( 300 ); });
+                $( '#loading' ).slideDown( 600 , function() 
+                { 
+                  $( '#button-bar-0' ).slideDown( 300 ); 
+                  $( '#getstarted_block' ).slideDown( 300 );
+                });
               })
              .withUserObject( this )
              .submitCatergory( reportCategory );
@@ -636,6 +646,7 @@
       function hideButtons(){
         $('form [id^="button-bar-"]').slideUp("fast");
         $( '#notice_block' ).slideUp("fast");
+        $( '#getstarted_block' ).slideUp("fast");
         $( '#flag-hint-options' ).slideUp("fast");
       }
 
