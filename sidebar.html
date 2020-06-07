@@ -144,6 +144,8 @@
         <div class="output" id="output" style="display:none">
           <p class="cursor" id="output-paragraph" contenteditable></p>
         </div>
+        <div id="notice_block" class="alert alert-success" role="alert" style="display: none;">
+        </div>
       </div>
       <div class="block text-center" id="button-bar-0" style="display:none;">
         <button class="btn btn-primary shadow lift mr-1 run-hint">
@@ -176,12 +178,13 @@
           </ul>
         </p>
         <br/><br/>
+        <div id="error-bay">
+        </div>
         <a class="upgrade-link" data-link="reviewhintimage" href="https://hintwriting.com/upgrade" target="_blank"><img style="max-width: 100%; cursor: pointer;" src="https://hintwriting.com/assets/img/addon/hint_upgrade_box.png"></a>
         <p class="text-center upgrade"><a data-link="reviewhint" href="https://hintwriting.com/upgrade" target="_blank" class="upgrade-link btn btn-outline-primary">Upgrade to Hint Plus</a></p>
       </div>
       <br/><br/>
-      <div id="error-bay">
-      </div>
+      
     </form>
     <!--
     <footer>
@@ -417,6 +420,10 @@
             {
               gtag( 'event' , 'not-enough-text', { 'event_category' : 'engagement', method : 'hint-sidebar' });
               logError( "prompt text not enough", false );
+              if ( response.notice !== "" ) 
+              {
+                $( '#notice_block' ).text(response.notice).slideDown();
+              }
               $( '#output' ).html( "<p>" + response.suggestion + "</p>" ).show( 500 );
               $( '#loading' ).hide( 'fast' , function()
               {
@@ -434,6 +441,10 @@
               $( '#loading' ).animate({ width: '-=80%', height: '-=80%' }, 500, function(){
                 $( '#output' ).show(0).attr( "contenteditable" , "true" );
                 typeWriter( "output" , [ response.suggestion ] );
+                if ( response.notice !== "" ) 
+                {
+                  $( '#notice_block' ).text(response.notice).slideDown();
+                }
               });
 
               element.disabled = false;
@@ -620,9 +631,11 @@
       }
       function hideError(){
         $('#error-bay').slideUp("fast");
+        $( '#notice_block' ).slideUp("fast");
       }
       function hideButtons(){
         $('form [id^="button-bar-"]').slideUp("fast");
+        $( '#notice_block' ).slideUp("fast");
         $( '#flag-hint-options' ).slideUp("fast");
       }
 

@@ -521,9 +521,11 @@ function getTextandGiveHint()
   Logger.log("surroundingText is: " + surroundingText);
 
   var prompt = surroundingText;
+  var notice = "";
 
   if( prompt.length < 180 )
   {
+    notice = "the above hint could be improved if you place the cursor at the end of a paragraph with 70 or more words.";
     // Logger.log("prompt too short");
     var bodyText = DocumentApp.getActiveDocument().getBody().getText();
 
@@ -550,7 +552,8 @@ function getTextandGiveHint()
 
   if ( prompt.length < 180 )
   {
-    suggestedText = "I'll be able to help you with a hint after you write a little more ( about 80 words )! Keep going and ask for a hint again once you are ready for inspiration.";
+    suggestedText = "";   
+    notice = "In order to get your first hint you'll need to write a little more ( about 80 words )! Keep going and ask for a hint again once you are ready for inspiration.";
     nohint = true;
   }
   else
@@ -594,7 +597,7 @@ function getTextandGiveHint()
   // Logger.log( 'hint id is ' + response);
   Logger.log('exiting getTextandGiveHint');
 
-  return { suggestion: suggestedText , nohint: nohint , hintid : response };
+  return { suggestion: suggestedText , nohint: nohint , hintid : response, notice : notice};
 }
 
 /**
