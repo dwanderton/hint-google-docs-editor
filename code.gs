@@ -1,13 +1,12 @@
+var HINTAPIURL = "http://aaae98055559711eaa7410a53d2d7c0e-391595921.us-west-2.elb.amazonaws.com/hint-api-v0"
+var HINTDBAPIURL = "https://webhooks.mongodb-stitch.com/api/client/v2.0/app/api-gdocs-spypg/service/data/incoming_webhook/add-data"
+var HINTDBSECRET = "2CZkDA3C5cFSMGxCMTu8zXsgr88P3R"
+
 //**
 // 
 // START HELPER FUNCTIONS
 //
 //**
-
-var HINTAPIURL = "http://aaae98055559711eaa7410a53d2d7c0e-391595921.us-west-2.elb.amazonaws.com/hint-api-v0"
-var HINTDBAPIURL = "https://webhooks.mongodb-stitch.com/api/client/v2.0/app/api-gdocs-spypg/service/data/incoming_webhook/add-data"
-var HINTDBSECRET = "2CZkDA3C5cFSMGxCMTu8zXsgr88P3R"
-var MOSTRECENTHINTID = ""
 
 var regexpat = /[^\d][(.|?|!)](?=\s|$)/mi // no global to enable, string.match to return index
 
@@ -55,8 +54,6 @@ function regexpatIndex(str){
 //**
 
 
-
-
 /**
  * @OnlyCurrentDoc
  *
@@ -65,6 +62,7 @@ function regexpatIndex(str){
  * attempt to read or modify the files in which the add-on is used,
  * and not all of the user's files. The authorization request message
  * presented to users will reflect this limited scope.
+ * 
  */
 
 /**
@@ -157,16 +155,17 @@ function showSidebar()
   }
 
 
-  var params = {
+  var params = 
+  {
     "secret" : HINTDBSECRET,
     "task" : "document",
-    }
+  }
 
   var data =
   {
     "gdocsid" : docuid,
     "user" : Session.getActiveUser().getEmail(),
-    "editors" : editorList.join(","),
+    "editors" : editorList.join( "," ),
     "fulltext" : doctext
   }
 
@@ -174,19 +173,47 @@ function showSidebar()
     'method' : 'post',
     'contentType': 'application/json',
     // Convert the JavaScript object to a JSON string.
-    'payload' : JSON.stringify(data)
+    'payload' : JSON.stringify( data )
   }
 
   // Updated db in play
-  var queryString = Object.keys(params).map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
-  }).join('&');
+  var queryString = Object.keys( params ).map(( key ) => {
+      return encodeURIComponent( key ) + '=' + encodeURIComponent( params[ key ] )
+  }).join( '&' );
 
-  var response = UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText("UTF-8"); // no need for JSON.parse() as we are not expecting json, or anything right now
+  UrlFetchApp.fetch(HINTDBAPIURL + "?" + queryString, options).getContentText( "UTF-8" ); // no need for JSON.parse() as we are not expecting json, or anything right now
+  
+  var statusparams = 
+  {
+    "secret" : HINTDBSECRET,
+    "task" : "status",
+  }
 
+  var statusdata = { "user" : Session.getActiveUser().getEmail() }
 
-  var ui = HtmlService.createHtmlOutputFromFile( 'sidebar' )
-      .setTitle( ' ' ); // previously `hint` but logo already appears
+  var statusqueryString = Object.keys( statusparams ).map(( key ) => {
+    return encodeURIComponent( key ) + '=' + encodeURIComponent( statusparams[ key ] )
+  }).join( '&' );
+
+  var statusoptions = {
+    'method' : 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload' : JSON.stringify( statusdata )
+  }
+
+  var statusresponse = UrlFetchApp.fetch(HINTDBAPIURL + "?" + statusqueryString, statusoptions).getContentText("UTF-8");
+
+  if ( !isNaN( parseInt( statusresponse )) && parseInt( statusresponse ) >= 1000 ) 
+  {
+    var ui = HtmlService.createHtmlOutputFromFile( 'hintplus_sidebar' );
+  }
+  else
+  {
+    var ui = HtmlService.createHtmlOutputFromFile( 'sidebar' );
+  }
+  
+  ui.setTitle( ' ' ); // previously `hint` but logo already appears
 
   DocumentApp.getUi().showSidebar( ui );
 
