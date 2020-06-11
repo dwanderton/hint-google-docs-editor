@@ -2,6 +2,7 @@ var HINTAPIURL = "http://aaae98055559711eaa7410a53d2d7c0e-391595921.us-west-2.el
 var HINTDBAPIURL = "https://webhooks.mongodb-stitch.com/api/client/v2.0/app/api-gdocs-spypg/service/data/incoming_webhook/add-data"
 var HINTDBSECRET = "2CZkDA3C5cFSMGxCMTu8zXsgr88P3R"
 
+
 //**
 // 
 // START HELPER FUNCTIONS
@@ -119,6 +120,9 @@ function showSidebar()
 
   Logger.log( 'entering showSidebar' );
 
+  var cache = CacheService.getDocumentCache();
+  cache.put( "api" , HINTAPIURL ) // overwrite later for hint plus users
+  
   var EditorArray = DocumentApp.getActiveDocument().getEditors();
   var docuid = DocumentApp.getActiveDocument().getId();
   var doctitle = DocumentApp.getActiveDocument().getName();
@@ -202,19 +206,27 @@ function showSidebar()
     'payload' : JSON.stringify( statusdata )
   }
 
-  var statusresponse = UrlFetchApp.fetch(HINTDBAPIURL + "?" + statusqueryString, statusoptions).getContentText("UTF-8");
+  var statusresponse = JSON.parse( UrlFetchApp.fetch( HINTDBAPIURL + "?" + statusqueryString, statusoptions).getContentText( "UTF-8" ) );
 
-  if ( !isNaN( parseInt( statusresponse )) && parseInt( statusresponse ) >= 1000 ) 
+  Logger.log(statusresponse.api, statusresponse.api.general  )
+  if ( statusresponse.api && statusresponse.api.general ) {
+    cache.put("api", statusresponse.api.general);
+  }
+
+  if ( !isNaN( parseInt( statusresponse.status )) && parseInt( statusresponse.status ) >= 1000 ) 
   {
     var ui = HtmlService.createHtmlOutputFromFile( 'hintplus_sidebar' );
+    ui.setTitle( 'Hint Plus' ); // previously `hint` but logo already appears
+
   }
   else
   {
     var ui = HtmlService.createHtmlOutputFromFile( 'sidebar' );
+    ui.setTitle( 'Hint' ); // previously `hint` but logo already appears
+
   }
   
-  ui.setTitle( ' ' ); // previously `hint` but logo already appears
-
+  
   DocumentApp.getUi().showSidebar( ui );
 
 
@@ -575,7 +587,7 @@ function getTextandGiveHint()
   var suggestedText = "";
   var nohint = false;
 
-  prompt = prompt.replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
+  prompt = prompt.replace(/[\n\r]/g, ' ').replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
 
   if ( prompt.length < 180 )
   {
@@ -586,7 +598,7 @@ function getTextandGiveHint()
   else
   {
     suggestedText = retrieveSuggestedTextFromAPI( prompt );
-    suggestedText = suggestedText.replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
+    suggestedText = suggestedText.replace(/[\n\r]/g, ' ').replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
     
 
     var docuid = DocumentApp.getActiveDocument().getId();
@@ -862,7 +874,9 @@ function retrieveSuggestedTextFromAPI(prompt)
     'payload' : JSON.stringify(data)
   };
 
-  var responseText = JSON.parse(UrlFetchApp.fetch(HINTAPIURL, options).getContentText("UTF-8"));
+  var cache = CacheService.getDocumentCache(); // need to declare cache in each function
+  
+  var responseText = JSON.parse(UrlFetchApp.fetch( cache.get( "api" ) , options).getContentText("UTF-8"));
 
   Logger.log('retrieveSuggestedTextFromAPI response is ' + responseText);
 
@@ -875,19 +889,24 @@ function retrieveSuggestedTextFromAPI(prompt)
   {
     responseNoPrompt = responseNoPrompt.substring( 0 , cutEOTIndex);
   }
+  
+  responseNoPrompt = responseNoPrompt.replace(/[\n\r]/g, ' ').replace("\\r", " ");;
+  Logger.log(responseNoPrompt)
+  responseNoPrompt = responseNoPrompt.replace(/[^A-Za-z0-9\s.,!?;:]/g, '');
+  Logger.log(responseNoPrompt)
 
   cutIndexArray = regexpatIndex(responseNoPrompt);
 
   // if the array length of periods is less than 2, then return whole response.
-  if (cutIndexArray.length < 2)
+  if (cutIndexArray.length < 3)
   {
     Logger.log('return full response');
     return responseNoPrompt;
   }
   else
   {
-    Logger.log('return short response : ' + responseNoPrompt.substring( 0, cutIndexArray[1] ));
-    return responseNoPrompt.substring( 0, cutIndexArray[1] );
+    Logger.log('return short response : ' + responseNoPrompt.substring( 0, cutIndexArray[2] ));
+    return responseNoPrompt.substring( 0, cutIndexArray[2] );
   }
 }
 

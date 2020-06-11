@@ -2,10 +2,657 @@
 <html>
   <head>
     <base target="_top">
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-154880962-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-154880962-2', {'page_path': "hintplus"});
+    </script>
+    
+    <!-- hint plus styles -->
+    <style>
+        body 
+        {
+            background-image: url('https://hintwriting.com/assets/img/addon/hintplus_bg.png');
+            background-size: cover;
+        }
+    </style>
+    <!-- Libs CSS -->
+    <link rel="stylesheet" href="https://hintwriting.com/assets/fonts/Feather/feather.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/flickity/dist/flickity.min.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/flickity-fade/flickity-fade.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/aos/dist/aos.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/jarallax/dist/jarallax.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/highlightjs/styles/vs2015.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/libs/@fancyapps/fancybox/dist/jquery.fancybox.min.css">
+
+    <!-- Theme CSS -->
+    <link rel="stylesheet" href="https://hintwriting.com/assets/css/theme.min.css">
+    <link rel="stylesheet" href="https://hintwriting.com/assets/css/custom.css">
+
+    <style>
+    /**
+    *
+    * Hint Plus styles
+    *
+    **/
+    
+    .btn-hintplus {
+      background: #07A7BA; 
+      background: -webkit-linear-gradient(right, #07A7BA, #0CB7AA); 
+      background: -moz-linear-gradient(right, #07A7BA, #0CB7AA); 
+      background: linear-gradient(to left, #07A7BA, #0CB7AA);
+      color: #ffffff;
+    }
+    
+
+    /*
+    Footer as the absolute footer
+    */
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: .2rem;            /* Footer height */
+    }
+
+    /*
+    * misc styles
+    */
+    #error-bay {
+      display:none;
+    }
+
+    .pointer {
+      cursor: pointer;
+    }
+
+    .flag-hint:hover, .flag-hint-trigger:hover, .flag-hint-trigger .active {
+      color: #df4759!important;
+    }
+
+    .btn-category {
+      padding-top: 3px;
+      padding-bottom: 3px;
+    }
+
+    /*
+    * typing styles
+    */
+
+    /* Cursor Styling */
+
+    .cursor::after {
+      content:'';
+      display:inline-block;
+      margin-left:3px;
+      background-color:black;
+      animation-name:blink;
+      animation-duration:0.5s;
+      animation-iteration-count: infinite;
+    }
+    h5.cursor::after {
+      height:13px;
+      width:6px;
+    }
+    p.cursor::after {
+      height:13px;
+      width:6px;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity:1;
+      }
+      49% {
+        opacity:1;
+      }
+      50% {
+        opacity:0;
+      }
+      100% {
+        opacity:0;
+      }
+    }
+    </style>
   </head>
   <body>
-  
-  HI welcome to hint plus
+    <div class="container" style="padding-top: 5%; padding-bottom: 5%;">
+        <span id="nav-top">
+          <a class="navbar-brand" href="https://hintwriting.com" target="_blank">
+            <img id="hintlogo" src="https://hintwriting.com/assets/img/brand_hintplus.png" class="navbar-brand-img" alt="hint logo" >
+          </a>
+          <br/><br/>
+        </span>
+        
     
+        <form>
+          <!-- %seenintro% : bool-->
+          
+    
+          <div id="category-questions">
+            <p class="lead">What type of writing will you be doing today?</p>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="marketing">marketing</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="business">business writing</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="legal">legal</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="school">school</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="creative">creative writing</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="journalism">journalism</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="other">other</button>
+            <button type="button" class="btn btn-light btn-lg btn-block btn-category btn-hintplus" data-value="noidea">no idea</button>
+            <br/><br/>
+          </div>
+    
+          <div id="loading" class="block" style="display:none;">
+            <div id="bm"></div>
+          </div>
+          <div id="getstarted_block" class="alert" role="alert" style="display: none;">Put your cursor at end of paragraph, and click "get a hint" to get started.</div>
+          <div class="form-group">
+            <div class="output" id="output" style="display:none">
+              <p class="cursor" id="output-paragraph" contenteditable></p>
+            </div>
+            <div id="notice_block" class="alert alert-success" role="alert" style="display: none;">
+            </div>
+          </div>
+          <div class="block text-center" id="button-bar-0" style="display:none;">
+            <button class="btn btn-primary shadow lift mr-1 run-hint btn-hintplus">
+              get a hint
+            </button>
+            <br/><br/>
+          </div>
+          <div class="block text-center" id="button-bar-1" style="display:none;">
+            <button class="btn btn-success shadow lift mr-1" id="insert-text">
+              insert
+            </button>
+            <button class="btn btn-outline-success shadow lift mr-1 re-hint">
+              <i class="fas fa-redo"></i> re-hint
+            </button>
+            <br><br>
+            <button class="btn btn-outline-danger shadow lift mr-1" id="reject-text">
+              <i class="fas fa-times"></i> reject
+            </button>
+             <p class="text-muted p-3">
+              <a class="flag-hint-trigger pointer"><i class="far fa-flag"></i> flag this hint</a>
+              <ul id="flag-hint-options" style="display: none;">
+                <li class="text-muted flag-hint pointer" data-reason="typos">typos and grammar</li>
+                <li class="text-muted flag-hint pointer" data-reason="incomplete">incomplete</li>
+                <li class="text-muted flag-hint pointer" data-reason="inaccurate">inaccurate</li>
+                <li class="text-muted flag-hint pointer" data-reason="nonsense">nonsense</li>
+                <li class="text-muted flag-hint pointer" data-reason="offensive severe">offensive - severe</li>
+                <li class="text-muted flag-hint pointer" data-reason="offensive mild">offensive - mild</li>
+              </ul>
+            </p>
+            <br/><br/>
+            <div id="error-bay">
+            </div>
+          </div>
+          <br/><br/>
+          
+        </form>
+        <!--
+        <footer>
+          <div class="container">
+            <small class="text-muted" onclick="copyShareHint()" style="cursor:pointer;">click <strong>here</strong> to share hint!</small>
+          </div>
+        </footer>
+      -->
+      </div>
+    
+      <!-- end of page -->
+    
+      <script>
+        /**
+         * 
+         *  Obtain user email for upgrade parameter ASAP
+         * 
+        **/
+    
+        google.script.run.withSuccessHandler(
+          function( response , element )
+          {
+            
+            userEmail = response.email;
+            
+            currentLink = $( '.upgrade-link' ).attr("href")
+            $( '.upgrade-link' ).attr( "href" , currentLink + '?email=' + userEmail );
+    
+          }).withFailureHandler(
+          function( msg, element ) {
+            logError( msg, true );
+          })
+          .getUserEmail();
+    
+      </script>
+    
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="https://kit.fontawesome.com/c5ae9bac41.js" crossorigin="anonymous"></script>
+      <script src="https://hintwriting.com/assets/js/lottie.js"></script>
+      <script>
+        /* robot animation */
+        var animation = bodymovin.loadAnimation({
+          container: document.getElementById('bm'),
+          renderer: 'svg',
+          loop: true,
+          autoplay: false,
+          path: 'https://hintwriting.com/assets/img/robot-animation/data_hintplus.json'
+        });
+    
+        </script>
+    
+    
+        <script>
+        /**
+        * typing https://codepen.io/daviddcarr/pen/XVyQMM
+        **/
+        // values to keep track of the number of letters typed, which quote to use. etc. Don't change these values.
+        var i = 0,
+            a = 0,
+            isBackspacing = false,
+            isParagraph = false;
+    
+        // Speed (in milliseconds) of typing.
+        var speedForward = 20, //Typing Speed
+            speedWait = 1000, // Wait between typing and backspacing
+            speedBetweenLines = 800, //Wait between end of sentences
+            speedBackspace = 5; //Backspace Speed
+    
+    
+        function typeWriter( id , ar , isBackspacing=false ) {
+          var element = $( "#" + id ),
+              aString = ar[ a ],
+              eParagraph = element.children( "p" ); //Subheader element
+    
+          if ( !eParagraph.hasClass( "cursor" ) )
+          {
+    
+            eParagraph.addClass( "cursor" );
+    
+          }
+    
+          // Determine if animation should be typing or backspacing
+          if ( !isBackspacing )
+          {
+    
+            // If full string hasn't yet been typed out, continue typing
+            if ( i < aString.length )
+            {
+    
+              if ( aString.charAt(i) == "." || aString.charAt(i) == "?" || aString.charAt(i) == "," )
+              {
+    
+                eParagraph.text( eParagraph.text() + aString.charAt(i) );
+                i++;
+                setTimeout( function(){ typeWriter(id, ar); }, speedBetweenLines );
+    
+              }
+              else
+              {
+    
+                eParagraph.text( eParagraph.text() + aString.charAt(i) );
+                i++;
+                setTimeout( function(){ typeWriter(id, ar); }, speedForward );
+    
+              }
+    
+            // If full string has been typed
+            }
+            else if ( i == aString.length )
+            {
+    
+              // full string typed.
+              console.info("finsihed typing");
+              eParagraph.removeClass("cursor");
+              lottie.pause();
+              $('#loading' ).hide( 'fast' , function()
+              {
+                $( '#button-bar-1' ).slideDown( 600 , function(){ $( '#output-paragraph' ).focus(); });
+                $( '#loading' ).animate({ width: '+=80%' , height: '+=80%' }, 0 );
+              });
+    
+              // TODO show insert and rehint button.
+    
+              // isBackspacing = true;
+              // setTimeout(function(){ typeWriter(id, ar); }, speedWait);
+    
+            }
+    
+          // If backspacing is enabled
+          } else {
+    
+            // If still has text, continue backspacing
+            if (eParagraph.text().length > 0) {
+              eParagraph.text(eParagraph.text().substring(0, eParagraph.text().length - 1));
+              setTimeout(function(){ typeWriter(id, ar, true); }, speedBackspace);
+    
+            // If no text, complete.
+            } else {
+    
+              i = 0;
+              // a = (a + 1) % ar.length; //Moves to next position in array, always looping back to 0
+              console.info("finsihed deleting");
+              eParagraph.removeClass("cursor");
+              $('#loading').show("fast");
+    
+              // setTimeout(function(){ typeWriter(id, ar); }, 50);
+    
+            }
+          }
+        }
+        </script>
+    
+        <script>
+    
+    
+          $(function() {
+            $( '.upgrade' ).click(upgrade);
+            $( '.btn-category' ).click(catqReport);
+            $( '.run-hint' ).click(hintText);
+            $( '.re-hint' ).click(rehint);
+            $( '.flag-hint-trigger' ).click( function(){ $( '#flag-hint-options' ).show() } )
+            $( '.flag-hint' ).click(flaghint);
+            $( '#insert-text' ).click(insertText);
+            $( '#reject-text' ).click(rejectText);
+            $( '.share-hint' ).click(copyShareHint);
+            var currentHint = "";
+    
+          });
+    
+    
+          /**
+           *
+           * While a new tab is opened, function prepares addon for user return
+           *
+          **/ 
+          
+          function upgrade ( event ) 
+          {
+            // $( '#nav-top ').show();
+            // $( '#postupgradepanel' ).show();
+            source = $( event.target ).data( 'link' );
+            gtag( 'event' , 'upgrade', { 'event_category' : 'engagement', method : source });
+          }
+    
+    
+          /**
+          *  Runs a server-side function to set user category
+          */
+          function catqReport ( event )
+          {
+            $( '.btn-category' ).attr( "disabled" , true )
+            reportCategory = $( event.target ).data( 'value' );
+            $( '#category-questions' ).hide( 'fast' );
+            google.script.run
+                .withSuccessHandler(
+                function( response , element )
+                {
+                    $( '#loading' ).slideDown( 600 , function() { 
+                      $( '#button-bar-0' ).slideDown( 300 ); 
+                      $( '#getstarted_block' ).slideDown( 300 );
+                    });
+                })
+                .withFailureHandler(
+                  function( msg , element ) {
+                    logError( msg, true );
+                    $( '#loading' ).slideDown( 600 , function() 
+                    { 
+                      $( '#button-bar-0' ).slideDown( 300 ); 
+                      $( '#getstarted_block' ).slideDown( 300 );
+                    });
+                  })
+                 .withUserObject( this )
+                 .submitCatergory( reportCategory );
+          }
+    
+          /**
+           * Runs a server-side function to fetch text based on user inputs
+           * the sidebar UI with the resulting text.
+           */
+          function hintText ( event ) {
+            if ( !$(event.target).hasClass('re-hint') )
+            {
+              gtag( 'event' , 'hint', { 'event_category' : 'engagement', method : 'hint-sidebar' });
+            }
+            $('#output').hide();
+            hideButtons();
+            hideError();
+            lottie.play();
+            typeWriter("output", [], true);
+            console.log('entering hintText');
+            this.disabled = true;
+            $('#error').remove();
+            var originalText = $('input[name=origin]').val();
+            google.script.run
+            .withSuccessHandler(
+              function( response , element )
+              {
+                currentHint = response.suggestion;
+                if(response.nohint)
+                {
+                  gtag( 'event' , 'not-enough-text', { 'event_category' : 'engagement', method : 'hint-sidebar' });
+                  logError( "prompt text not enough", false );
+                  if ( response.notice !== "" ) 
+                  {
+                    $( '#notice_block' ).text(response.notice).slideDown();
+                  }
+                  $( '#output' ).html( "<p>" + response.suggestion + "</p>" ).show( 500 );
+                  $( '#loading' ).hide( 'fast' , function()
+                  {
+                    lottie.pause();
+                    setTimeout( function(){ rejectText( {}, true ); }, 5000 );
+    
+                  });
+    
+    
+                  element.disabled = false;
+                }
+                else
+                {
+                  $( '#output' ).data( 'hid' , response.hintid );
+                  $( '#loading' ).animate({ width: '-=80%', height: '-=80%' }, 500, function(){
+                    $( '#output' ).show(0).attr( "contenteditable" , "true" );
+                    typeWriter( "output" , [ response.suggestion ] );
+                    if ( response.notice !== "" ) 
+                    {
+                      $( '#notice_block' ).text(response.notice).slideDown();
+                    }
+                  });
+    
+                  element.disabled = false;
+                }
+              })
+            .withFailureHandler(
+              function( msg, element ) {
+                logError( msg, true );
+                lottie.pause();
+                element.disabled = false;
+                displayError();
+                $( '#button-bar-0' ).slideDown(600);
+              })
+              .withUserObject( this )
+              .getTextandGiveHint();
+            console.log( 'exiting hintText' );
+          }
+    
+    
+          function rehint ( event ) 
+          {
+            gtag('event', 're-hint', { 'event_category': 'engagement', 'event_label': 're-hint' });
+    
+            $('#output').hide();
+            hideButtons();
+            hideError();
+            lottie.play();
+            typeWriter("output", [], true);
+            console.log('entering hintText');
+            this.disabled = true;
+            $('#error').remove();
+    
+            hintid = $( '#output' ).data( 'hid' );
+            google.script.run
+            .withSuccessHandler(
+              function(returnSuccess, element) {
+                hintText( event )
+                element.disabled = false;
+              })
+            .withFailureHandler(
+              function(msg, element) {
+                console.log('failure!')
+                logError(msg, false);
+                hintText( event )
+                element.disabled = false;
+    
+              })
+            .withUserObject( this )
+            .reHint( hintid );
+          }
+    
+          /**
+           * Runs a server-side function to insert the fetched text into the document
+           * at the user's cursor or selection.
+           */
+          function insertText() {
+            hideButtons();
+            hideError();
+            gtag('event', 'insert', { 'event_category' : 'engagement', method : 'hint-sidebar'});
+            console.log('entering insertText');
+            //var originalText = $('input[name=origin]').val();
+            this.disabled = true;
+            typeWriter("output", [], true);
+            hintid = $( '#output' ).data( 'hid' );
+            
+            google.script.run
+              .withSuccessHandler(
+                function(returnSuccess, element) {
+                  element.disabled = false;
+                  //$('#textSuggestion').val(returnSuccess.suggestion);
+                  //$('input[name=originalText]').val(returnSuccess.suggestion);
+    
+                  // factor out into function
+                  $('#loading').show("fast");
+                  $('#button-bar-0').slideDown(600);
+                })
+              .withFailureHandler(
+                function(msg, element) {
+                  logError(msg, true);
+                  displayError();
+                  element.disabled = false;
+    
+                  // factor out into function
+                  $('#loading').show("fast");
+                  $('#button-bar-0').slideDown(600);
+                })
+              .withUserObject( this )
+              .insertText( $('#output').text() , hintid)
+    
+              console.log('exiting insertText');
+          }
+    
+          function rejectText(event, nohint) {
+            hideButtons();
+            hideError();
+            console.log('entering rejectText');
+            if( typeof nohint === 'undefined' )
+            { 
+              gtag('event', 'reject', { 'event_category' : 'engagement' , method : 'hint-sidebar' }); 
+              hintid = $( '#output' ).data( 'hid' );
+              google.script.run
+              .withSuccessHandler(
+                function(returnSuccess, element) {
+                  
+                  this.disabled = true;
+                  typeWriter( "output" , [], true );
+                  $( '#loading' ).show( "fast" );
+                  $( '#button-bar-0' ).slideDown( 600 );
+    
+                })
+              .withFailureHandler(
+                function(msg, element) {
+    
+                  logError(msg, false);
+                  this.disabled = true;
+                  typeWriter( "output" , [], true );
+                  $( '#loading' ).show( "fast" );
+                  $( '#button-bar-0' ).slideDown( 600 );
+    
+                })
+              .withUserObject( this )
+              .rejectHint( hintid );
+    
+            } 
+            else
+            {
+    
+              this.disabled = true;
+              typeWriter( "output" , [] , true );
+              $( '#loading' ).show( "fast" );
+              $( '#button-bar-0' ).slideDown( 600 );
+              
+    
+            }
+            console.log( 'exiting rejectText' );
+          }
+    
+          function flaghint (event, issue=0 ) {
+            hideButtons();
+            
+            reason = $( this ).data( "reason" )
+            console.log(reason);
+            gtag('event', 'flag-hint', { 'event_category': 'engagement', 'event_label': reason, 'event_value': issue});
+    
+            hintid = $( '#output' ).data( 'hid' );
+              google.script.run
+              .withSuccessHandler(
+                function(returnSuccess, element) {
+                  console.log('success')
+                  this.disabled = true;
+                  $( '#flag-hint-options' ).hide()
+                  typeWriter( "output" , [], true );
+                  $( '#loading' ).show( "fast" );
+                  $( '#button-bar-0' ).slideDown( 600 );
+    
+                })
+              .withFailureHandler(
+                function(msg, element) {
+                  console.log('failure!')
+                  logError(msg, false);
+                  $( '#flag-hint-options' ).hide()
+                  this.disabled = true;
+                  typeWriter( "output" , [], true );
+                  $( '#loading' ).show( "fast" );
+                  $( '#button-bar-0' ).slideDown( 600 );
+    
+                })
+              .withUserObject( this )
+              .flagHint( hintid , reason );
+    
+          }
+    
+    
+    
+    
+          function logError(msg, fatal) {
+            console.error(msg);
+            gtag('event', 'exception', { 'description': msg, 'fatal' : fatal});
+          }
+          function displayError(){
+            var div = $('<div class="alert alert-warning" role="alert"><strong>Oops!</strong><br/>Seems like something didn\'t quite work out. First try resarting Hint, and then if something still doesn\'t work log out of all your google accounts and back in, if you are still having issues email <strong>hello@hintwriting.com</strong> for support!</div>');
+            $('#error-bay').html(div);
+            $('#error-bay').slideDown("slow");
+          }
+          function hideError(){
+            $('#error-bay').slideUp("fast");
+            $( '#notice_block' ).slideUp("fast");
+          }
+          function hideButtons(){
+            $('form [id^="button-bar-"]').slideUp("fast");
+            $( '#notice_block' ).slideUp("fast");
+            $( '#getstarted_block' ).slideUp("fast");
+            $( '#flag-hint-options' ).slideUp("fast");
+          }
+
+        </script>
   </body>
 </html>
